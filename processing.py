@@ -8,27 +8,44 @@ import xarray as xr
 
 data_path = "data/"
 
-# Read the dataset.
+# Read the datasets.
 
-era5 = xr.open_dataset(data_path + "era5_sst_t2m.nc", decode_times=False)
-print("ERA5:")
-print(era5)
+era5_19592022 = xr.open_dataset(data_path + "era5_sst_t2m_011959_112022.nc", decode_times=False)
+era5_19501978 = xr.open_dataset(data_path + "era5_sst_t2m_011950_121978.nc", decode_times=False)
+print("ERA5:", era5_19592022, era5_19501978)
 print("--------------------")
 print()
 
-# Turn it into a smaller size.
+# Turn datasets into arrays and get wanted variables.
 
-era5 = era5.to_array()
-#print("ERA5:", era5)
-print("ERA5's shape:", era5.shape)
+era5_19592022 = era5_19592022.to_array()
+era5_19501978 = era5_19501978.to_array()
 
-era5_sst = np.array(era5[1,:,1,:,:])
-#print("ERA5 SST:", era5_sst)
-print("ERA5 SST's shape:", era5_sst.shape)
+# Convert Kelvin to Celsius.
+era5_19592022 -= 273.15
+era5_19501978 -= 273.15
 
-era5_t2m = np.array(era5[0,:,1,:,:])
-#print("ERA5 T2M:", era5_t2m)
-print("ERA5 T2M's shape:", era5_t2m.shape)
+print("ERA5:", era5_19592022, era5_19501978)
+print("ERA5's shape:", era5_19592022.shape, era5_19501978.shape)
+print("--------------------")
+print()
+
+era5_sst_19592022 = np.array(era5_19592022[1,:,0,:,:])
+era5_sst_19501978 = np.array(era5_19501978[1,:,:,:])
+print("ERA5 SST:", era5_sst_19592022, era5_sst_19501978)
+print("ERA5 SST's shape:", era5_sst_19592022.shape, era5_sst_19501978.shape)
+print("--------------------")
+print()
+
+era5_t2m_19592022 = np.array(era5_19592022[0,:,0,:,:])
+era5_t2m_19501978 = np.array(era5_19501978[0,:,:,:])
+print("ERA5 T2M:", era5_t2m_19592022, era5_t2m_19501978)
+print("ERA5 T2M's shape:", era5_t2m_19592022.shape, era5_t2m_19501978.shape)
+print("--------------------")
+print()
+
+era5_sst = np.concatenate((era5_sst_19501978, era5_sst_19592022[240:]))
+era5_t2m = np.concatenate((era5_t2m_19501978, era5_t2m_19592022[240:]))
 
 save(data_path + "era5_sst_grid.npy", era5_sst)
 save(data_path + "era5_t2m_grid.npy", era5_t2m)
@@ -68,5 +85,20 @@ save(data_path + "era5_ssta_grid.npy", era5_ssta)
 save(data_path + "era5_t2ma_grid.npy", era5_t2ma)
 
 print("Save the two tensors in NPY files.")
+print("--------------------")
+print()
+
+# Combine the two grids into one grid, explained on Page 17, Taylor & Feng, 2022.
+
+era5_combined = era5_sst
+mask = np.isnan(era5_sst) & ~np.isnan(era5_t2m)
+era5_combined[mask] = era5_t2m[mask]
+
+save(data_path + "era5_ssta_t2m_grid.npy", era5_combined)
+
+print("ERA5 SSTA-T2M:", era5_combined)
+print("ERA5 SSTA-T2M's shape:", era5_combined.shape)
+
+print("Save the tensor in an NPY file.")
 print("--------------------")
 print()
