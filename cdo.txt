@@ -1,0 +1,32 @@
+%%bash
+
+# cdo commands for processing data
+
+# FAQ: https://code.mpimet.mpg.de/projects/cdo/wiki/FAQ#How-can-I-remap-my-data-to-a-different-grid-of-another-data-file
+
+# Check long information.
+cdo info era5_sstwt2m_011950_082022.nc
+
+# Check short information.
+cdo sinfo era5_sstwt2m_011950_082022.nc
+
+# Check variable names.
+cdo showname era5_sstwt2m_011950_082022.nc
+
+# Split into files via variables.
+cdo splitparam era5_sstwt2m_011950_082022.nc test
+
+# Split into files via levels and eliminate the dimension.
+cdo --reduce_dim splitlevel era5_sstwt2m_011979_082022.nc era5_sstwt2m_011979_082022
+
+# Extract time from the whole time.
+cdo seltimestep,241/764 era5_sstwt2m_011959_112022.nc era5_sstwt2m_011979_082022.nc
+
+# Combine two files via time.
+cdo mergetime era5_sstwt2m_011950_121978.nc era5_sstwt2m_011979_082022_1.nc era5_sstwt2m_011950_082022.nc
+
+# Resize the grid to 0.5x0.5 degree.
+cdo remapbil,r720x360 era5_sstwt2m_011950_082022.nc era5_sstwt2m_011950_082022_half.nc
+
+# Resize the grid with info in the txt file using a bilinear interpolation.
+cdo remapbil,globegrid.txt era5_sstwt2m_011950_082022_half.nc era5_sstwt2m_011950_082022_globe.nc
