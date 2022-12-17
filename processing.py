@@ -16,6 +16,7 @@ print("ERA5:", era5_19592022, era5_19501978)
 print("--------------------")
 print()
 
+"""
 # Turn datasets into arrays and get wanted variables.
 
 era5_19592022 = era5_19592022.to_array()
@@ -30,14 +31,14 @@ print("ERA5's shape:", era5_19592022.shape, era5_19501978.shape)
 print("--------------------")
 print()
 
-era5_sst_19592022 = np.array(era5_19592022[1,:,0,:,:])
+era5_sst_19592022 = np.array(era5_19592022[1,:-2,0,:,:]) # Fields at the last two time steps.
 era5_sst_19501978 = np.array(era5_19501978[1,:,:,:])
 print("ERA5 SST:", era5_sst_19592022, era5_sst_19501978)
 print("ERA5 SST's shape:", era5_sst_19592022.shape, era5_sst_19501978.shape)
 print("--------------------")
 print()
 
-era5_t2m_19592022 = np.array(era5_19592022[0,:,0,:,:])
+era5_t2m_19592022 = np.array(era5_19592022[0,:-2,0,:,:])
 era5_t2m_19501978 = np.array(era5_19501978[0,:,:,:])
 print("ERA5 T2M:", era5_t2m_19592022, era5_t2m_19501978)
 print("ERA5 T2M's shape:", era5_t2m_19592022.shape, era5_t2m_19501978.shape)
@@ -94,11 +95,27 @@ era5_combined = era5_sst
 mask = np.isnan(era5_sst) & ~np.isnan(era5_t2m)
 era5_combined[mask] = era5_t2m[mask]
 
-save(data_path + "era5_ssta_t2m_grid.npy", era5_combined)
+save(data_path + "era5_sst_t2m_grid.npy", era5_combined)
 
 print("ERA5 SSTA-T2M:", era5_combined)
 print("ERA5 SSTA-T2M's shape:", era5_combined.shape)
 
 print("Save the tensor in an NPY file.")
+print("--------------------")
+print()
+"""
+
+# Else, do it on netCDF files directly.
+# Count the number of non-NA values.
+#print(era5_19592022.count())
+sst_t2m_19592022 = era5_19592022.fillna(era5_19592022['t2m'])
+#print(sst_t2m_19592022)
+#print(sst_t2m_19592022.count())
+sst_t2m_19501978 = era5_19501978.fillna(era5_19501978['t2m'])
+
+sst_t2m_19592022.to_netcdf(path=data_path + "era5_sstwt2m_011959_112022.nc")
+sst_t2m_19501978.to_netcdf(path=data_path + "era5_sstwt2m_011950_121978.nc")
+
+print("Save the netCDF datasets in NC files.")
 print("--------------------")
 print()
