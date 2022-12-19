@@ -56,6 +56,10 @@ for i in range(len(train_grid)-window_size-lead_time+1):
     train_grid_output.append(train_grid[i+window_size+lead_time-2:i+window_size+lead_time])
 train_grid_input = np.array(train_grid_input)
 train_grid_output = np.array(train_grid_output)
+train_grid_input = np.einsum('klij->kijl', train_grid_input)
+train_grid_output = np.einsum('klij->kijl', train_grid_output)
+train_grid_input = np.expand_dims(train_grid_input, axis=0)
+train_grid_output = np.expand_dims(train_grid_output, axis=0)
 
 test_grid_input = []
 test_grid_output = []
@@ -65,8 +69,17 @@ for i in range(len(test_grid)-window_size-lead_time+1):
     test_grid_output.append(test_grid[i+window_size+lead_time-2:i+window_size+lead_time])
 test_grid_input = np.array(test_grid_input)
 test_grid_output = np.array(test_grid_output)
+test_grid_input = np.einsum('klij->kijl', test_grid_input)
+test_grid_output = np.einsum('klij->kijl', test_grid_output)
+test_grid_input = np.expand_dims(test_grid_input, axis=0)
+test_grid_output = np.expand_dims(test_grid_output, axis=0)
+
+print(test_grid_input.shape)
+print(test_grid_output.shape)
 
 # Set up the Unet-LSTM.
+
+time_sequence = train_grid_input.shape[1]
 
 num_lats = grid_norm.shape[1]
 num_longs = grid_norm.shape[2]
@@ -83,3 +96,6 @@ num_responses = 2
 hvd.init()
 
 model = unet_lstm(num_hidden_units, num_responses, time_sequence, num_features, num_lats, num_longs, bound)
+
+history = model.fit(train_grid_input, train_grid_output, batch_size=4, epochs=200, verbose=True)
+loss, mse  = model.evaluate(test_grid_input, test_grid_output, verbose=False)
