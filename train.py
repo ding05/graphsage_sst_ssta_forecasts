@@ -32,7 +32,7 @@ grid_norm = grid / np.linalg.norm (grid)
 print(grid_norm[-1])
 print(grid_norm.shape)
 
-# Set up the Unet-LSTM.
+# Sliding Window
 
 train_split = 0.9
 num_year = grid_norm.shape[0] / 12
@@ -41,6 +41,32 @@ test_num_year = int(num_year - train_num_year)
 
 time_sequence = train_num_year * 12
 print("Number of training time steps:", time_sequence)
+
+train_grid = grid_norm[:time_sequence]
+test_grid = grid_norm[time_sequence:]
+
+window_size = 12
+lead_time = 2
+
+train_grid_input = []
+train_grid_output = []
+
+for i in range(len(train_grid)-window_size-lead_time+1):
+    train_grid_input.append(train_grid[i:i+window_size])
+    train_grid_output.append(train_grid[i+window_size+lead_time-2:i+window_size+lead_time])
+train_grid_input = np.array(train_grid_input)
+train_grid_output = np.array(train_grid_output)
+
+test_grid_input = []
+test_grid_output = []
+
+for i in range(len(test_grid)-window_size-lead_time+1):
+    test_grid_input.append(test_grid[i:i+window_size])
+    test_grid_output.append(test_grid[i+window_size+lead_time-2:i+window_size+lead_time])
+test_grid_input = np.array(test_grid_input)
+test_grid_output = np.array(test_grid_output)
+
+# Set up the Unet-LSTM.
 
 num_lats = grid_norm.shape[1]
 num_longs = grid_norm.shape[2]
@@ -56,4 +82,4 @@ num_responses = 2
 # Initialize Horovod.
 hvd.init()
 
-unet_lstm(num_hidden_units, num_responses, time_sequence, num_features, num_lats, num_longs, bound)
+model = unet_lstm(num_hidden_units, num_responses, time_sequence, num_features, num_lats, num_longs, bound)
