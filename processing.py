@@ -105,7 +105,7 @@ print("--------------------")
 print()
 """
 
-# Else, do it on netCDF files directly.
+# Else, do it on NC files directly.
 # Count the number of non-NA values.
 #print(era5_19592022.count())
 sst_t2m_19592022 = era5_19592022.fillna(era5_19592022['t2m'])
