@@ -69,6 +69,8 @@ for time_i in range(num_time):
     edge_index = torch.tensor(adj_mat, dtype=torch.long)
     data = Data(x=x, y=y, edge_index=edge_index, num_nodes=node_feats_grid.shape[0], num_edges=adj_mat.shape[1], has_isolated_nodes=True, has_self_loops=False, is_undirected=True)
     #data = Data(x=x, y=y, num_nodes=node_feats_grid.shape[0], num_edges=adj_mat.shape[1], has_isolated_nodes=True, has_self_loops=False, is_undirected=True)
+    # If directed graphs
+    #data = Data(x=x, y=y, edge_index=edge_index, num_nodes=node_feats_grid.shape[0], num_edges=adj_mat.shape[1], has_isolated_nodes=True, has_self_loops=False, is_undirected=False)
     graph_list.append(data)
 
 # Set the number of decimals in torch tensors printed.
@@ -108,8 +110,30 @@ class MultiGraphGCN(torch.nn.Module):
         x_concat = torch.cat(x_list, dim=0)
         return x_concat
 
+# If directed graphs
+class MultiGraphGCN_D(torch.nn.Module):
+    def __init__(self, in_channels, hid_channels, out_channels, num_graphs, flow='source_to_target'):
+        super(MultiGraphGCN_D, self).__init__()
+        self.convs = torch.nn.ModuleList([torch.nn.Sequential(GCNConv(in_channels, hid_channels, flow=flow), GCNConv(hid_channels, hid_channels, flow=flow), GCNConv(hid_channels, out_channels, flow=flow)) for _ in range(num_graphs)])
+        #self.convs = torch.nn.ModuleList([torch.nn.Sequential(GCNConv(in_channels, hid_channels), GCNConv(hid_channels, hid_channels), GCNConv(hid_channels, hid_channels), GCNConv(hid_channels, out_channels)) for _ in range(num_graphs)])
+        self.double()
+    def forward(self, data_list):
+        x_list = []
+        for i, data in enumerate(data_list):
+            x = data.x
+            for j, layer in enumerate(self.convs[i]):
+                x = layer(x, data.edge_index)
+                #x = F.tanh(x) # tanh() and sigmoid() suit y in [-1, 1].
+                #x = F.relu(x) # relu() ant its variant suit y in a larger range.
+                x = F.elu(x)
+            x_list.append(x)
+        x_concat = torch.cat(x_list, dim=0)
+        return x_concat
+
 # Define the model.
 model = MultiGraphGCN(in_channels=graph_list[0].x[0].shape[0], hid_channels=50, out_channels=1, num_graphs=len(train_graph_list))
+# If directed graphs
+#model = MultiGraphGCN_D(in_channels=graph_list[0].x[0].shape[0], hid_channels=50, out_channels=1, num_graphs=len(train_graph_list))
 
 # Define the loss function.
 criterion = nn.MSELoss()
