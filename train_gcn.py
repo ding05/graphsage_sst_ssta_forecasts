@@ -215,9 +215,6 @@ for epoch in range(num_epochs):
     for data in train_graph_list:
         optimizer.zero_grad()
         output = model([data])
-        #print(output.shape)
-        #print(output.squeeze().shape)
-        #print(torch.tensor(data.y).squeeze().shape)
         loss = criterion(output.squeeze(), torch.tensor(data.y).squeeze())
         loss.backward()
         optimizer.step()
