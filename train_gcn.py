@@ -6,7 +6,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 from torch.optim import Adam
 from torch_geometric.data import Data
-from torch_geometric.nn import GCNConv, RGCNConv
+from torch_geometric.nn import GCNConv, GATConv, SAGEConv, GatedGraphConv, RGCNConv
 
 import time
 
@@ -18,7 +18,7 @@ window_size = 12
 lead_time = 1
 learning_rate = 0.01
 #learning_rate = 0.005 # for complex models
-num_epochs = 100
+num_epochs = 30
 
 # Load the data.
 
@@ -42,8 +42,8 @@ print('Shape:', node_feats_grid_normalized.shape)
 print('----------')
 print()
 
-#adj_mat = load('data/adj_mat_0.95.npy')
-adj_mat = load('data/adj_mat_0.9_directed.npy')
+adj_mat = load('data/adj_mat_0.95.npy')
+#adj_mat = load('data/adj_mat_0.9_directed.npy')
 print('Adjacency matrix:', adj_mat)
 print('Shape:', adj_mat.shape)
 print('----------')
@@ -69,11 +69,11 @@ for time_i in range(num_time):
         '''
     x = torch.tensor(x)
     edge_index = torch.tensor(adj_mat, dtype=torch.long)
-    #data = Data(x=x, y=y, edge_index=edge_index, num_nodes=node_feats_grid.shape[0], num_edges=adj_mat.shape[1], has_isolated_nodes=True, has_self_loops=False, is_undirected=True)
+    data = Data(x=x, y=y, edge_index=edge_index, num_nodes=node_feats_grid.shape[0], num_edges=adj_mat.shape[1], has_isolated_nodes=True, has_self_loops=False, is_undirected=True)
     #data = Data(x=x, y=y, num_nodes=node_feats_grid.shape[0], num_edges=adj_mat.shape[1], has_isolated_nodes=True, has_self_loops=False, is_undirected=True)
     # If directed graphs
-    edge_attr = torch.ones(edge_index.shape[1], dtype=torch.float)
-    data = Data(x=x, y=y, edge_index=edge_index, edge_attr=edge_attr, num_nodes=node_feats_grid.shape[0], num_edges=adj_mat.shape[1], has_isolated_nodes=True, has_self_loops=False, is_undirected=False)
+    #edge_attr = torch.ones(edge_index.shape[1], dtype=torch.float)
+    #data = Data(x=x, y=y, edge_index=edge_index, edge_attr=edge_attr, num_nodes=node_feats_grid.shape[0], num_edges=adj_mat.shape[1], has_isolated_nodes=True, has_self_loops=False, is_undirected=False)
     graph_list.append(data)
 
 # Set the number of decimals in torch tensors printed.
@@ -97,8 +97,8 @@ test_graph_list = graph_list[760:]
 class MultiGraphGCN(torch.nn.Module):
     def __init__(self, in_channels, hid_channels, out_channels, num_graphs):
         super(MultiGraphGCN, self).__init__()
-        #self.convs = torch.nn.ModuleList([torch.nn.Sequential(GCNConv(in_channels, hid_channels), GCNConv(hid_channels, hid_channels), GCNConv(hid_channels, out_channels)) for _ in range(num_graphs)])
-        self.convs = torch.nn.ModuleList([torch.nn.Sequential(GCNConv(in_channels, hid_channels), GCNConv(hid_channels, hid_channels), GCNConv(hid_channels, hid_channels), GCNConv(hid_channels, out_channels)) for _ in range(num_graphs)])
+        self.convs = torch.nn.ModuleList([torch.nn.Sequential(GCNConv(in_channels, hid_channels), GCNConv(hid_channels, out_channels)) for _ in range(num_graphs)])
+        #self.convs = torch.nn.ModuleList([torch.nn.Sequential(GCNConv(in_channels, hid_channels), GCNConv(hid_channels, hid_channels), GCNConv(hid_channels, hid_channels), GCNConv(hid_channels, out_channels)) for _ in range(num_graphs)])
         self.double()
     def forward(self, data_list):
         x_list = []
@@ -113,11 +113,63 @@ class MultiGraphGCN(torch.nn.Module):
         x_concat = torch.cat(x_list, dim=0)
         return x_concat
 
+class MultiGraphGAT(nn.Module):
+    def __init__(self, in_channels, hid_channels, out_channels, num_heads, num_graphs):
+        super(MultiGraphGAT, self).__init__()
+        self.convs = torch.nn.ModuleList([torch.nn.Sequential(GATConv(in_channels, hid_channels, num_heads), GATConv(hid_channels * num_heads, out_channels, 1)) for _ in range(num_graphs)])
+        #self.convs = torch.nn.ModuleList([torch.nn.Sequential(GATConv(in_channels, hid_channels, num_heads), GATConv(hid_channels * num_heads, hid_channels, num_heads), GATConv(hid_channels * num_heads, out_channels, 1)) for _ in range(num_graphs)])
+        self.double()
+    def forward(self, data_list):
+        x_list = []
+        for i, data in enumerate(data_list):
+            x = data.x
+            for j, layer in enumerate(self.convs[i]):
+                x = layer(x, data.edge_index)
+                x = F.elu(x)
+            x_list.append(x)
+        x_concat = torch.cat(x_list, dim=0)
+        return x_concat
+
+class MultiGraphSage(torch.nn.Module):
+    def __init__(self, in_channels, hid_channels, out_channels, num_graphs):
+        super(MultiGraphSage, self).__init__()
+        self.convs = torch.nn.ModuleList([torch.nn.Sequential(SAGEConv(in_channels, hid_channels), SAGEConv(hid_channels, out_channels)) for _ in range(num_graphs)])
+        self.double()
+    def forward(self, data_list):
+        x_list = []
+        for i, data in enumerate(data_list):
+            x = data.x
+            for j, layer in enumerate(self.convs[i]):
+                x = layer(x, data.edge_index)
+                x = F.elu(x)
+            x_list.append(x)
+        x_concat = torch.cat(x_list, dim=0)
+        return x_concat
+
+class MultiGraphGGCN(torch.nn.Module):
+    def __init__(self, in_channels, hid_channels, out_channels, num_graphs):
+        super(MultiGraphGGCN, self).__init__()
+        self.convs = torch.nn.ModuleList([torch.nn.Sequential(GatedGraphConv(in_channels, hid_channels), GatedGraphConv(hid_channels, out_channels)) for _ in range(num_graphs)])
+        self.fc = nn.Linear(hid_channels, out_channels)
+        self.double()
+    def forward(self, data_list):
+        x_list = []
+        for i, data in enumerate(data_list):
+            x = data.x
+            for j, layer in enumerate(self.convs[i]):
+                x = layer(x, data.edge_index)
+                x = F.elu(x)
+            x_list.append(x)
+        x_concat = torch.cat(x_list, dim=0)
+        out = self.fc(x_concat)
+        return out
+
 # If directed graphs
 class MultiGraphRGCN(torch.nn.Module):
     def __init__(self, in_channels, hid_channels, out_channels, num_relations, num_bases):
         super(MultiGraphRGCN, self).__init__()
-        self.convs = torch.nn.ModuleList([torch.nn.Sequential(GCNConv(in_channels, hid_channels, num_relations, num_bases), GCNConv(hid_channels, hid_channels, num_relations, num_bases), GCNConv(hid_channels, out_channels, num_relations, num_bases))])
+        #self.convs = torch.nn.ModuleList([torch.nn.Sequential(GCNConv(in_channels, hid_channels, num_relations, num_bases), GCNConv(hid_channels, hid_channels, num_relations, num_bases), GCNConv(hid_channels, out_channels, num_relations, num_bases))])
+        self.convs = torch.nn.ModuleList([torch.nn.Sequential(GCNConv(in_channels, hid_channels, num_relations, num_bases), GCNConv(hid_channels, hid_channels, num_relations, num_bases), GCNConv(hid_channels, hid_channels, num_relations, num_bases), GCNConv(hid_channels, out_channels, num_relations, num_bases))])
         self.double()
     def forward(self, data_list):
         x_list = []
@@ -131,9 +183,12 @@ class MultiGraphRGCN(torch.nn.Module):
         return x_concat
 
 # Define the model.
-#model = MultiGraphGCN(in_channels=graph_list[0].x[0].shape[0], hid_channels=50, out_channels=1, num_graphs=len(train_graph_list))
+#model = MultiGraphGCN(in_channels=graph_list[0].x[0].shape[0], hid_channels=30, out_channels=1, num_graphs=len(train_graph_list))
+#model = MultiGraphGAT(in_channels=graph_list[0].x[0].shape[0], hid_channels=30, out_channels=1, num_heads=4, num_graphs=len(train_graph_list))
+#model = MultiGraphSage(in_channels=graph_list[0].x[0].shape[0], hid_channels=30, out_channels=1, num_graphs=len(train_graph_list))
+model = MultiGraphGGCN(in_channels=graph_list[0].x[0].shape[0], hid_channels=30, out_channels=1, num_graphs=len(train_graph_list))
 # If directed graphs
-model = MultiGraphRGCN(in_channels=graph_list[0].x[0].shape[0], hid_channels=50, out_channels=1, num_relations=2, num_bases=2)
+#model = MultiGraphRGCN(in_channels=graph_list[0].x[0].shape[0], hid_channels=50, out_channels=1, num_relations=2, num_bases=4)
 
 # Define the loss function.
 criterion = nn.MSELoss()
@@ -160,6 +215,9 @@ for epoch in range(num_epochs):
     for data in train_graph_list:
         optimizer.zero_grad()
         output = model([data])
+        #print(output.shape)
+        #print(output.squeeze().shape)
+        #print(torch.tensor(data.y).squeeze().shape)
         loss = criterion(output.squeeze(), torch.tensor(data.y).squeeze())
         loss.backward()
         optimizer.step()
