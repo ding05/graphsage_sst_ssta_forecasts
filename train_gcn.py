@@ -16,12 +16,11 @@ out_path = 'out/'
 
 node_filename = 'node_feats.npy'
 adj_filename = 'adj_mat_0.95.npy'
-#adj_filename = 'adj_mat_0.90_directed.npy'
+#adj_filename = 'adj_mat_0.9_directed.npy'
 
 window_size = 12
 lead_time = 1
 learning_rate = 0.001
-#learning_rate = 0.005 # for complex models
 num_epochs = 20
 
 # Load the data.
@@ -75,9 +74,10 @@ for time_i in range(num_time):
     x = torch.tensor(x)
     edge_index = torch.tensor(adj_mat, dtype=torch.long)
     data = Data(x=x, y=y, edge_index=edge_index, num_nodes=node_feat_grid.shape[0], num_edges=adj_mat.shape[1], has_isolated_nodes=True, has_self_loops=False, is_undirected=True)
+    # If an empty adjacency matrix
     #data = Data(x=x, y=y, num_nodes=node_feat_grid.shape[0], num_edges=adj_mat.shape[1], has_isolated_nodes=True, has_self_loops=False, is_undirected=True)
     # If directed graphs
-    #edge_attr = torch.ones(edge_index.shape[1], dtype=torch.float)
+    edge_attr = torch.ones(edge_index.shape[1], dtype=torch.float)
     #data = Data(x=x, y=y, edge_index=edge_index, edge_attr=edge_attr, num_nodes=node_feat_grid.shape[0], num_edges=adj_mat.shape[1], has_isolated_nodes=True, has_self_loops=False, is_undirected=False)
     graph_list.append(data)
 
@@ -114,9 +114,9 @@ class MultiGraphGCN(torch.nn.Module):
             x = data.x
             for j, layer in enumerate(self.convs[i]):
                 x = layer(x, data.edge_index)
-                #x = F.tanh(x) # tanh() and sigmoid() suit y in [-1, 1].
+                #x = torch.tanh(x) # tanh() and sigmoid() suit y in [-1, 1].
                 #x = F.relu(x) # relu() ant its variant suit y in a larger range.
-                x = F.elu(x)
+                x = torch.tanh(x)
             x_list.append(x)
         x_concat = torch.cat(x_list, dim=0)
         return x_concat
@@ -133,7 +133,7 @@ class MultiGraphGAT(nn.Module):
             x = data.x
             for j, layer in enumerate(self.convs[i]):
                 x = layer(x, data.edge_index)
-                x = F.elu(x)
+                x = torch.tanh(x)
             x_list.append(x)
         x_concat = torch.cat(x_list, dim=0)
         return x_concat
@@ -149,7 +149,7 @@ class MultiGraphSage(torch.nn.Module):
             x = data.x
             for j, layer in enumerate(self.convs[i]):
                 x = layer(x, data.edge_index)
-                x = F.elu(x)
+                x = torch.tanh(x)
             x_list.append(x)
         x_concat = torch.cat(x_list, dim=0)
         return x_concat
@@ -166,7 +166,7 @@ class MultiGraphGGCN(torch.nn.Module):
             x = data.x
             for j, layer in enumerate(self.convs[i]):
                 x = layer(x, data.edge_index)
-                x = F.elu(x)
+                x = torch.tanh(x)
             x_list.append(x)
         x_concat = torch.cat(x_list, dim=0)
         out = self.fc(x_concat)
@@ -185,15 +185,15 @@ class MultiGraphRGCN(torch.nn.Module):
             x = data.x
             for j, layer in enumerate(self.convs[i]):
                 x = layer(x, data.edge_index, data.edge_attr)
-                x = F.elu(x)
+                x = torch.tanh(x)
             x_list.append(x)
         x_concat = torch.cat(x_list, dim=0)
         return x_concat
 
 # Define the model.
 #model, model_class = MultiGraphGCN(in_channels=graph_list[0].x[0].shape[0], hid_channels=30, out_channels=1, num_graphs=len(train_graph_list)), 'GCN'
-model, model_class = MultiGraphGAT(in_channels=graph_list[0].x[0].shape[0], hid_channels=30, out_channels=1, num_heads=8, num_graphs=len(train_graph_list)), 'GAT'
-#model, model_class = MultiGraphSage(in_channels=graph_list[0].x[0].shape[0], hid_channels=30, out_channels=1, num_graphs=len(train_graph_list)), 'SAGE'
+#model, model_class = MultiGraphGAT(in_channels=graph_list[0].x[0].shape[0], hid_channels=30, out_channels=1, num_heads=8, num_graphs=len(train_graph_list)), 'GAT'
+model, model_class = MultiGraphSage(in_channels=graph_list[0].x[0].shape[0], hid_channels=30, out_channels=1, num_graphs=len(train_graph_list)), 'SAGE'
 #model, model_class = MultiGraphGGCN(in_channels=graph_list[0].x[0].shape[0], hid_channels=30, out_channels=1, num_graphs=len(train_graph_list)), 'GGCN'
 # If directed graphs
 #model, model_class = MultiGraphRGCN(in_channels=graph_list[0].x[0].shape[0], hid_channels=50, out_channels=1, num_relations=2, num_bases=4), 'RGCN'
