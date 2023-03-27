@@ -282,7 +282,7 @@ for epoch in range(num_epochs):
 
     # Update the best model weights if the current validation MSE is lower than the previous minimum.
     if val_mse_nodes.item() < min_val_mse:
-        min_val_mse = val_mse
+        min_val_mse = val_mse_nodes.item()
         best_epoch = epoch
         best_model_weights = model.state_dict()
         best_optimizer_state = optimizer.state_dict()
