@@ -24,7 +24,11 @@ learning_rate = 0.01 # 0.0005, 0.001 for RMSProp
 weight_decay = 0.0001 # 0.0001 for RMSProp
 momentum = 0.9
 l1_ratio = 1
-num_epochs = 50 #20
+num_epochs = 100 #20
+# Early stopping, if the validation MSE has not improved for "patience" epochs, stop training.
+patience = 10
+min_val_mse = np.inf
+counter = 0
 
 # Load the data.
 
@@ -275,6 +279,21 @@ for epoch in range(num_epochs):
     print('Loss by epoch:', loss_epochs)
     print('Validation MSE by epoch:', val_mse_nodes_epochs)
 
+    # Update the best model weights if the current validation MSE is lower than the previous minimum.
+    if val_mse_nodes.item() < min_val_mse:
+        min_val_mse = val_mse
+        best_epoch = epoch
+        best_model_weights = model.state_dict()
+        best_optimizer_state = optimizer.state_dict()
+        best_loss = loss
+        counter = 0
+    else:
+        counter += 1
+    # If the validation MSE has not improved for "patience" epochs, stop training.
+    if counter >= patience:
+        print(f'Early stopping at Epoch {epoch} with best validation MSE: {min_val_mse} at Epoch {best_epoch}.')
+        break
+
 print('----------')
 print()
 
@@ -315,10 +334,14 @@ print()
 
 # Save the model.
 torch.save({
-            'epoch': num_epochs,
-            'model_state_dict': model.state_dict(),
-            'optimizer_state_dict': optimizer.state_dict(),
-            'loss': loss
+            #'epoch': num_epochs,
+            #'model_state_dict': model.state_dict(),
+            #'optimizer_state_dict': optimizer.state_dict(),
+            'epoch': best_epoch,
+            'model_state_dict': best_model_weights,
+            'optimizer_state_dict': best_optimizer_state,
+            #'loss': loss
+            'loss': best_loss
             }, models_path + model_class + '_' + adj_filename[8:-4] + '_' + str(stop))
 
 print('Save the checkpoint in a TAR file.')
