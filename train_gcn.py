@@ -24,11 +24,10 @@ learning_rate = 0.01 # 0.0005, 0.001 for RMSProp
 weight_decay = 0.0001 # 0.0001 for RMSProp
 momentum = 0.9
 l1_ratio = 1
-num_epochs = 100 #20
+num_epochs = 200 #20
 # Early stopping, if the validation MSE has not improved for "patience" epochs, stop training.
-patience = 10
+patience = 20
 min_val_mse = np.inf
-counter = 0
 
 # Load the data.
 
@@ -227,6 +226,8 @@ start = time.time()
 # Record the results by epoch.
 loss_epochs = []
 val_mse_nodes_epochs = []
+# Early stopping starting counter
+counter = 0
 
 for epoch in range(num_epochs):
     # Iterate over the training data.
@@ -286,6 +287,7 @@ for epoch in range(num_epochs):
         best_model_weights = model.state_dict()
         best_optimizer_state = optimizer.state_dict()
         best_loss = loss
+        best_pred_node_feats = pred_node_feats
         counter = 0
     else:
         counter += 1
@@ -325,7 +327,8 @@ print()
 
 save(out_path + model_class + '_' + adj_filename[8:-4] + '_' + str(stop) +  '_losses' + '.npy', np.array(loss_epochs))
 save(out_path + model_class + '_' + adj_filename[8:-4] + '_' + str(stop) +  '_valmses' + '.npy', np.array(val_mse_nodes_epochs))
-save(out_path + model_class + '_' + adj_filename[8:-4] + '_' + str(stop) +  '_preds' + '.npy', pred_node_feats)
+#save(out_path + model_class + '_' + adj_filename[8:-4] + '_' + str(stop) +  '_preds' + '.npy', pred_node_feats)
+save(out_path + model_class + '_' + adj_filename[8:-4] + '_' + str(stop) +  '_preds' + '.npy', best_pred_node_feats)
 save(out_path + model_class + '_' + adj_filename[8:-4] + '_' + str(stop) +  '_testobs' + '.npy', test_node_feats)
 
 print('Save the results in NPY files.')
