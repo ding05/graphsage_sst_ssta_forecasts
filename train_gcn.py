@@ -15,7 +15,7 @@ models_path = 'configs/'
 out_path = 'out/'
 
 node_filename = 'node_feats.npy'
-adj_filename = 'adj_mat_0.5.npy'
+adj_filename = 'adj_mat_0.3.npy'
 #adj_filename = 'adj_mat_0.9_directed.npy'
 
 window_size = 12
