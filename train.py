@@ -15,13 +15,14 @@ data_path = 'data/'
 models_path = 'configs/'
 out_path = 'out/'
 
-node_filename = 'node_feats_ssta.npy'
+node_feat_filename = 'node_feats_sst.npy'
+node_y_filename = 'node_feats_ssta.npy'
 adj_filename = 'adj_mat_0.3.npy'
 #adj_filename = 'adj_mat_0.9_directed.npy'
 
 window_size = 12
 lead_time = 1
-learning_rate = 0.05 # 0.01 for SSTs # 0.0005, 0.001 for RMSProp for SSTs
+learning_rate = 0.01 # for SSTs # 0.0005, 0.001 for RMSProp for SSTs
 weight_decay = 0.0001 # 0.0001 for RMSProp
 momentum = 0.9
 l1_ratio = 1
@@ -32,13 +33,14 @@ min_val_mse = np.inf
 
 # Load the data.
 
-node_feat_grid = load(data_path + node_filename)
+node_feat_grid = load(data_path + node_feat_filename)
 print('Node feature grid in Kelvin:', node_feat_grid)
 print('Shape:', node_feat_grid.shape)
 print('----------')
 print()
 
-"""
+node_y_grid = load(data_path + node_y_filename)
+
 # Convert Kelvin to Celsius.
 node_feat_grid -= 273.15
 print('Node feature grid in Celsius:', node_feat_grid)
@@ -46,13 +48,12 @@ print('Shape:', node_feat_grid.shape)
 print('----------')
 print()
 
-# Normalize the data to [-1, 1].
-node_feat_grid_normalized = (node_feat_grid - np.min(node_feat_grid)) / (np.max(node_feat_grid) - np.min(node_feat_grid)) * 2 - 1
+# Normalize the data to [0, 1].
+node_feat_grid_normalized = (node_feat_grid - np.min(node_feat_grid[:,:840])) / (np.max(node_feat_grid[:,:840]) - np.min(node_feat_grid[:,:840])) * 2 - 1
 print('Normalized node feature grid:', node_feat_grid_normalized)
 print('Shape:', node_feat_grid_normalized.shape)
 print('----------')
 print()
-"""
 
 adj_mat = load(data_path + adj_filename)
 print('Adjacency matrix:', adj_mat)
@@ -70,11 +71,11 @@ for time_i in range(num_time):
     y = []
     for node_i in range(node_feat_grid.shape[0]):
         # The inputs are normalized node features.
-        x.append(node_feat_grid[node_i][time_i : time_i + window_size])
-        #x.append(node_feat_grid_normalized[node_i][time_i : time_i + window_size])
+        #x.append(node_feat_grid[node_i][time_i : time_i + window_size])
+        x.append(node_feat_grid_normalized[node_i][time_i : time_i + window_size])
         # The outputs are node features in Celsius.
-        y.append(node_feat_grid[node_i][time_i + window_size + lead_time - 1])
         #y.append(node_feat_grid_normalized[node_i][time_i + window_size + lead_time - 1])
+        y.append(node_y_grid[node_i][time_i + window_size + lead_time - 1])
         '''
         # The outputs are normalized node features.
         y.append(node_feat_grid_normalized[node_i][time_i + window_size + lead_time - 1])
@@ -101,8 +102,8 @@ torch.set_printoptions(precision=8)
 print('Inputs of the first node in the first graph, i.e. the first time step:', graph_list[0].x[0])
 #print('Output of the first node in the first graph:', graph_list[0].y[0])
 print('Check if they match those in the node features:', node_feat_grid[0][:13])
-print('Check if they match those in the normalized node features:', node_feat_grid[0][:13])
-#print('Check if they match those in the normalized node features:', node_feat_grid_normalized[0][:13])
+#print('Check if they match those in the node features:', node_feat_grid[0][:13])
+print('Check if they match those in the normalized node features:', node_feat_grid_normalized[0][:13])
 print('----------')
 print()
 
@@ -114,8 +115,8 @@ val_graph_list = graph_list[840:]
 test_graph_list = graph_list[840:]
 
 #test_node_feats = node_feat_grid[:, 840 + window_size - lead_time + 1:]
-test_node_feats = node_feat_grid[:, 840 + window_size - lead_time + 1:]
 #test_node_feats = node_feat_grid_normalized[:, 840 + window_size - lead_time + 1:]
+test_node_feats = node_y_grid[:, 840 + window_size - lead_time + 1:]
 
 # Define the model.
 #model, model_class = MultiGraphGCN(in_channels=graph_list[0].x[0].shape[0], hid_channels=30, out_channels=1, num_graphs=len(train_graph_list)), 'GCN'
