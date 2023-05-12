@@ -15,7 +15,7 @@ data_path = 'data/'
 models_path = 'configs/'
 out_path = 'out/'
 
-node_feat_filename = 'node_feats_sst.npy'
+node_feat_filename = 'node_feats_ssta.npy'
 node_y_filename = 'node_feats_ssta.npy'
 adj_filename = 'adj_mat_0.3.npy'
 #adj_filename = 'adj_mat_0.9_directed.npy'
@@ -41,17 +41,19 @@ print()
 
 node_y_grid = load(data_path + node_y_filename)
 
+"""
 # Convert Kelvin to Celsius.
 node_feat_grid -= 273.15
 print('Node feature grid in Celsius:', node_feat_grid)
 print('Shape:', node_feat_grid.shape)
 print('----------')
 print()
+"""
 
 # Normalize the data to [-1, 1].
-#node_feat_grid_normalized = (node_feat_grid - np.min(node_feat_grid[:,:840])) / (np.max(node_feat_grid[:,:840]) - np.min(node_feat_grid[:,:840])) * 2 - 1
+node_feat_grid_normalized = (node_feat_grid - np.min(node_feat_grid[:,:840])) / (np.max(node_feat_grid[:,:840]) - np.min(node_feat_grid[:,:840])) * 2 - 1
 # Normalize the data to [0, 1].
-node_feat_grid_normalized = (node_feat_grid - np.min(node_feat_grid[:,:840])) / (np.max(node_feat_grid[:,:840]) - np.min(node_feat_grid[:,:840]))
+#node_feat_grid_normalized = (node_feat_grid - np.min(node_feat_grid[:,:840])) / (np.max(node_feat_grid[:,:840]) - np.min(node_feat_grid[:,:840]))
 print('Normalized node feature grid:', node_feat_grid_normalized)
 print('Shape:', node_feat_grid_normalized.shape)
 print('----------')
@@ -75,7 +77,7 @@ for time_i in range(num_time):
         # The inputs are normalized node features.
         #x.append(node_feat_grid[node_i][time_i : time_i + window_size])
         x.append(node_feat_grid_normalized[node_i][time_i : time_i + window_size])
-        # The outputs are node features in Celsius.
+        # The outputs are node features in Kelvin.
         #y.append(node_feat_grid_normalized[node_i][time_i + window_size + lead_time - 1])
         y.append(node_y_grid[node_i][time_i + window_size + lead_time - 1])
         '''
