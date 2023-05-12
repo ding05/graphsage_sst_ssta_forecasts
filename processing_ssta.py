@@ -79,4 +79,4 @@ print('----------')
 print("ERA5 Globe SSTAs' shape:", converted_node_feat_grid.shape)
 print('--------------------')
 
-np.save(data_path + 'converted_node_filename.npy', converted_node_feat_grid)
+np.save(data_path + converted_node_filename, converted_node_feat_grid)
