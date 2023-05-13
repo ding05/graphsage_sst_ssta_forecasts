@@ -15,14 +15,14 @@ data_path = 'data/'
 models_path = 'configs/'
 out_path = 'out/'
 
-node_feat_filename = 'node_feats_ssta.npy'
+node_feat_filename = 'node_feats_sst.npy'
 #node_y_filename = 'node_feats_ssta.npy'
-adj_filename = 'adj_mat_0.3.npy'
+adj_filename = 'adj_mat_0.7.npy'
 #adj_filename = 'adj_mat_0.9_directed.npy'
 
 window_size = 12
 lead_time = 1
-learning_rate = 0.05 # 0.01 for SSTs # 0.0005, 0.001 for RMSProp for SSTs
+learning_rate = 0.01 # 0.01 for SSTs # 0.0005, 0.001 for RMSProp for SSTs
 weight_decay = 0.0001 # 0.0001 for RMSProp
 momentum = 0.9
 l1_ratio = 1
@@ -51,9 +51,9 @@ print()
 """
 
 # Normalize the data to [-1, 1].
-node_feat_grid_normalized = (node_feat_grid - np.min(node_feat_grid[:,:840])) / (np.max(node_feat_grid[:,:840]) - np.min(node_feat_grid[:,:840])) * 2 - 1
+#node_feat_grid_normalized = (node_feat_grid - np.min(node_feat_grid[:,:840])) / (np.max(node_feat_grid[:,:840]) - np.min(node_feat_grid[:,:840])) * 2 - 1
 # Normalize the data to [0, 1].
-#node_feat_grid_normalized = (node_feat_grid - np.min(node_feat_grid[:,:840])) / (np.max(node_feat_grid[:,:840]) - np.min(node_feat_grid[:,:840]))
+node_feat_grid_normalized = (node_feat_grid - np.min(node_feat_grid[:,:840])) / (np.max(node_feat_grid[:,:840]) - np.min(node_feat_grid[:,:840]))
 print('Normalized node feature grid:', node_feat_grid_normalized)
 print('Shape:', node_feat_grid_normalized.shape)
 print('----------')
