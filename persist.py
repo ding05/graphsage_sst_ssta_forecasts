@@ -4,7 +4,7 @@ from numpy import asarray, save, load
 data_path = 'data/'
 out_path = 'out/'
 
-node_filename = 'node_feats.npy'
+node_filename = 'node_feats_ssta.npy'
 
 window_size = 12
 lead_time = 1
@@ -33,8 +33,10 @@ print('Shape:', node_feat_grid_normalized.shape)
 print('----------')
 print()
 
-persist_preds = node_feat_grid_normalized[:, 760 + window_size - lead_time :-1]
-persist_obs = node_feat_grid_normalized[:, 760 + window_size - lead_time + 1:]
+#persist_preds = node_feat_grid[:, 840 + window_size - lead_time :-1]
+persist_preds = node_feat_grid_normalized[:, 840 + window_size - lead_time :-1]
+#persist_obs = node_feat_grid[:, 840 + window_size - lead_time + 1:]
+persist_obs = node_feat_grid_normalized[:, 840 + window_size - lead_time + 1:]
 
 persist_mses = np.mean((persist_preds - persist_obs) ** 2, axis=1)
 
