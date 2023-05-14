@@ -17,7 +17,7 @@ out_path = 'out/'
 
 node_feat_filename = 'node_feats_sst.npy'
 #node_y_filename = 'node_feats_ssta.npy'
-adj_filename = 'adj_mat_0.7.npy'
+adj_filename = 'adj_mat_0.68.npy'
 #adj_filename = 'adj_mat_0.9_directed.npy'
 
 window_size = 12
