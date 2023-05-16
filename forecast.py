@@ -18,7 +18,7 @@ out_path = 'out/'
 node_feat_filename = 'node_feats_sst.npy'
 adj_filename = 'adj_mat_0.7.npy'
 
-saved_model = 'SAGE_0.7_1684017063.223997.tar'
+saved_model = 'SAGE_0.7_1684017063.223997'
 
 window_size = 12
 lead_time = 23
