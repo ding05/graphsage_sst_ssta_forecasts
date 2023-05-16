@@ -89,14 +89,14 @@ print('----------')
 print()
 
 train_graph_list = graph_list[:840]
-test_graph_list = graph_list[840 + window_size : 840 + window_size + lead_time]
+test_graph_list = graph_list[840 : 840 + lead_time]
 #print('Test output observations:', test_graph_list)
 print("Test output observations' length:", len(test_graph_list)) # The list contains lead_time graphs.
 print('----------')
 print()
 
 # Extract strating test input features.
-test_input_graph_list = graph_list[840 : 840 + window_size]
+test_input_graph_list = [graph_list[840]]
 #print('Starting test input features:', test_input_graph_list)
 print("Starting test input features' length:", len(test_input_graph_list)) # The list contains window_size graphs.
 print('----------')
@@ -108,6 +108,14 @@ model, model_class = MultiGraphSage(in_channels=graph_list[0].x[0].shape[0], hid
 # Load the model.
 checkpoint = torch.load(models_path + saved_model)
 model.load_state_dict(checkpoint['model_state_dict'])
+print("Pre-trained model loaded")
+print('----------')
+print()
 
 # Use a loop to input the features and update the features.
-#for i in range(lead_time):
+#for month in range(lead_time):
+for month in range(1):
+    for data in test_input_graph_list:
+        output = model([data])
+        print('Predictions:', [round(i, 4) for i in output.squeeze().tolist()[::300]])
+        print("Predictions' shape:", output.squeeze().shape)
