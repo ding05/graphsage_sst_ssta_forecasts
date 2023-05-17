@@ -96,7 +96,8 @@ print('----------')
 print()
 
 # Extract strating test input features.
-test_input_graph_list = [graph_list[840]]
+start_test_input_graph_list = [graph_list[840]]
+test_input_graph_list = start_test_input_graph_list
 #print('Starting test input features:', test_input_graph_list)
 print("Starting test input features' length:", len(test_input_graph_list)) # The list contains window_size graphs.
 print('----------')
@@ -113,9 +114,31 @@ print('----------')
 print()
 
 # Use a loop to input the features and update the features.
-#for month in range(lead_time):
-for month in range(1):
-    for data in test_input_graph_list:
-        output = model([data])
-        print('Predictions:', [round(i, 4) for i in output.squeeze().tolist()[::300]])
-        print("Predictions' shape:", output.squeeze().shape)
+for month in range(lead_time):
+#for month in range(2):
+
+    print('Month', month)
+    print('----------')
+    print()
+    
+    output = model(test_input_graph_list)
+    print('Predictions:', [round(i, 4) for i in output.squeeze().tolist()[::300]])
+    print("Predictions' shape:", output.squeeze().shape)
+    print('----------')
+    print()
+    
+    # Update the graph with new predictions.
+    """
+    print('x[0]:', test_input_graph_list[0].x[0])
+    print("x'shape:", test_input_graph_list[0].x.shape)
+    """
+    print('x:', test_input_graph_list[0].x)
+    print('----------')
+    print()
+    
+    old_x = test_input_graph_list[0].x
+    added_x = output
+    new_x = torch.cat((old_x, added_x), dim=1)
+    new_x = new_x[:, 1:]
+    new_graph = Data(x=new_x, y=None, edge_index=edge_index, num_nodes=node_feat_grid.shape[0], num_edges=adj_mat.shape[1], has_isolated_nodes=True, has_self_loops=False, is_undirected=True)
+    test_input_graph_list = [new_graph]
