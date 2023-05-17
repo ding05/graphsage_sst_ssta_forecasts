@@ -21,7 +21,7 @@ adj_filename = 'adj_mat_0.7.npy'
 saved_model = 'SAGE_0.7_1684017063.223997'
 
 window_size = 12
-lead_time = 23
+lead_time = 24
 
 # Load the data.
 
@@ -45,7 +45,7 @@ print('----------')
 print()
 
 # Compute the total number of time steps.
-num_time = node_feat_grid.shape[1] - window_size - lead_time + 1
+num_time = node_feat_grid.shape[1] - window_size - 1 + 1
 
 # Generate PyG graphs from NumPy arrays.
 graph_list = []
@@ -60,7 +60,7 @@ for time_i in range(num_time):
         #y.append(node_feat_grid[node_i][time_i + window_size + lead_time - 1])
         #y.append(node_y_grid[node_i][time_i + window_size + lead_time - 1])
         # The outputs are normalized node features.
-        y.append(node_feat_grid_normalized[node_i][time_i + window_size + lead_time - 1])
+        y.append(node_feat_grid_normalized[node_i][time_i + window_size + 1 - 1])
     x = torch.tensor(x)
     # Generate incomplete graphs with the adjacency matrix.
     edge_index = torch.tensor(adj_mat, dtype=torch.long)
@@ -89,17 +89,17 @@ print('----------')
 print()
 
 train_graph_list = graph_list[:840]
-test_graph_list = graph_list[840 : 840 + lead_time]
+test_graph_list = graph_list[959 : 959 + lead_time]
+test_graph_list_combined = graph_list[959 - window_size : 959 + lead_time]
 #print('Test output observations:', test_graph_list)
 print("Test output observations' length:", len(test_graph_list)) # The list contains lead_time graphs.
 print('----------')
 print()
 
 # Extract strating test input features.
-start_test_input_graph_list = [graph_list[840]]
-test_input_graph_list = start_test_input_graph_list
-#print('Starting test input features:', test_input_graph_list)
-print("Starting test input features' length:", len(test_input_graph_list)) # The list contains window_size graphs.
+start_test_input_graph_list = [graph_list[959]]
+#print('Starting test input features:', start_test_input_graph_list)
+print("Starting test input features' length:", len(start_test_input_graph_list)) # The list contains window_size graphs.
 print('----------')
 print()
 
@@ -113,6 +113,10 @@ print("Pre-trained model loaded")
 print('----------')
 print()
 
+# Initialization.
+test_input_graph_list = start_test_input_graph_list
+predictions = []
+
 # Use a loop to input the features and update the features.
 for month in range(lead_time):
 #for month in range(2):
@@ -122,7 +126,8 @@ for month in range(lead_time):
     print()
     
     output = model(test_input_graph_list)
-    print('Predictions:', [round(i, 4) for i in output.squeeze().tolist()[::300]])
+    #print('Predictions of the first three nodes:', [round(i, 4) for i in output.squeeze().tolist()[:3]])
+    print('Predictions of every 300th node:', [round(i, 4) for i in output.squeeze().tolist()[::300]])
     print("Predictions' shape:", output.squeeze().shape)
     print('----------')
     print()
@@ -142,3 +147,40 @@ for month in range(lead_time):
     new_x = new_x[:, 1:]
     new_graph = Data(x=new_x, y=None, edge_index=edge_index, num_nodes=node_feat_grid.shape[0], num_edges=adj_mat.shape[1], has_isolated_nodes=True, has_self_loops=False, is_undirected=True)
     test_input_graph_list = [new_graph]
+    print('new x:', test_input_graph_list[0].x)
+    print('----------')
+    print()
+    
+    # Save the predictions.
+    predictions.append(output)
+
+# Save the results.
+prediction_tensor = torch.stack(predictions, dim=1)
+prediction_array = prediction_tensor.detach().numpy()
+prediction_array = prediction_array.squeeze()
+print('Predictions:', prediction_array)
+#print(prediction_array.shape)
+# Add the features of the window size.
+feature_array = start_test_input_graph_list[0].x.detach().numpy()
+combined_prediction_array = np.concatenate((feature_array, prediction_array), axis=1)
+
+observation_list = []
+for graph in test_graph_list:
+    observation_list.append(graph.y)
+observation_array = np.array(observation_list).T
+print('Observations:', observation_array)
+#print(observation_array.shape)
+combined_observation_list = []
+for graph in test_graph_list_combined:
+    combined_observation_list.append(graph.y)
+combined_observation_array = np.array(combined_observation_list).T
+print('Observations:', combined_observation_array)
+print('----------')
+print()
+
+save(out_path + saved_model + '_' + str(lead_time) + 'month_predictions' + '.npy', combined_prediction_array)
+save(out_path + saved_model + '_' + str(lead_time) + 'month_observations' + '.npy', combined_observation_array)
+
+print('Save the results in NPY files.')
+print('----------')
+print()
