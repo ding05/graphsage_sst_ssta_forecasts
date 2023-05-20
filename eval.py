@@ -89,15 +89,15 @@ print('----------')
 print()
 
 train_graph_list = graph_list[:840]
-test_graph_list = graph_list[959 : 959 + lead_time]
-test_graph_list_combined = graph_list[959 - window_size : 959 + lead_time]
+test_graph_list = graph_list[960 : 960 + lead_time]
+test_graph_list_combined = graph_list[960 - window_size : 960 + lead_time]
 #print('Test output observations:', test_graph_list)
 print("Test output observations' length:", len(test_graph_list)) # The list contains lead_time graphs.
 print('----------')
 print()
 
 # Extract strating test input features.
-start_test_input_graph_list = [graph_list[959]]
+start_test_input_graph_list = [graph_list[960]]
 #print('Starting test input features:', start_test_input_graph_list)
 print("Starting test input features' length:", len(start_test_input_graph_list)) # The list contains window_size graphs.
 print('----------')
@@ -159,22 +159,27 @@ prediction_tensor = torch.stack(predictions, dim=1)
 prediction_array = prediction_tensor.detach().numpy()
 prediction_array = prediction_array.squeeze()
 print('Predictions:', prediction_array)
-#print(prediction_array.shape)
+print("Predictions' shape:", prediction_array.shape)
 # Add the features of the window size.
 feature_array = start_test_input_graph_list[0].x.detach().numpy()
 combined_prediction_array = np.concatenate((feature_array, prediction_array), axis=1)
+print('Combined predictions:', combined_prediction_array)
+print("Combined predictions' shape:", combined_prediction_array.shape)
+print('----------')
+print()
 
 observation_list = []
 for graph in test_graph_list:
     observation_list.append(graph.y)
 observation_array = np.array(observation_list).T
 print('Observations:', observation_array)
-#print(observation_array.shape)
+print("Observations' shape", observation_array.shape)
 combined_observation_list = []
 for graph in test_graph_list_combined:
     combined_observation_list.append(graph.y)
 combined_observation_array = np.array(combined_observation_list).T
-print('Observations:', combined_observation_array)
+print('Combined observations:', combined_observation_array)
+print("Combined observations' shape:", combined_observation_array.shape)
 print('----------')
 print()
 
