@@ -41,9 +41,9 @@ class MultiGraphGAT(nn.Module):
         return x_concat
 
 class MultiGraphSage(torch.nn.Module):
-    def __init__(self, in_channels, hid_channels, out_channels, num_graphs):
+    def __init__(self, in_channels, hid_channels, out_channels, num_graphs, aggr='mean'):
         super(MultiGraphSage, self).__init__()
-        self.convs = torch.nn.ModuleList([torch.nn.Sequential(SAGEConv(in_channels, hid_channels), SAGEConv(hid_channels, out_channels)) for _ in range(num_graphs)])
+        self.convs = torch.nn.ModuleList([torch.nn.Sequential(SAGEConv(in_channels, hid_channels, aggr=aggr), SAGEConv(hid_channels, out_channels, aggr=aggr)) for _ in range(num_graphs)])
         #self.double()
     def forward(self, data_list):
         x_list = []
