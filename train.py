@@ -17,7 +17,7 @@ out_path = 'out/'
 
 node_feat_filename = 'node_feats_sst.npy'
 #node_y_filename = 'node_feats_ssta.npy'
-adj_filename = 'adj_mat_0.68.npy'
+adj_filename = 'adj_mat_0.7.npy'
 #adj_filename = 'adj_mat_0.9_directed.npy'
 
 window_size = 12
@@ -123,7 +123,7 @@ test_node_feats = node_feat_grid_normalized[:, 840 + window_size - lead_time + 1
 # Define the model.
 #model, model_class = MultiGraphGCN(in_channels=graph_list[0].x[0].shape[0], hid_channels=30, out_channels=1, num_graphs=len(train_graph_list)), 'GCN'
 #model, model_class = MultiGraphGAT(in_channels=graph_list[0].x[0].shape[0], hid_channels=30, out_channels=1, num_heads=8, num_graphs=len(train_graph_list)), 'GAT'
-model, model_class = MultiGraphSage(in_channels=graph_list[0].x[0].shape[0], hid_channels=30, out_channels=1, num_graphs=len(train_graph_list)), 'SAGE'
+model, model_class = MultiGraphSage(in_channels=graph_list[0].x[0].shape[0], hid_channels=30, out_channels=1, num_graphs=len(train_graph_list), aggr='max'), 'SAGE'
 #model, model_class = MultiGraphGGCN(in_channels=graph_list[0].x[0].shape[0], hid_channels=30, out_channels=1, num_graphs=len(train_graph_list)), 'GGCN'
 # If directed graphs
 #model, model_class = MultiGraphRGCN(in_channels=graph_list[0].x[0].shape[0], hid_channels=50, out_channels=1, num_relations=2, num_bases=4), 'RGCN'
