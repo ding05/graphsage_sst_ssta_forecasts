@@ -22,7 +22,7 @@ adj_filename = 'adj_mat_0.7.npy'
 
 window_size = 12
 lead_time = 1
-learning_rate = 0.01 # 0.01 for SSTs # 0.0005, 0.001 for RMSProp for SSTs
+learning_rate = 0.001 # 0.01 for SSTs # 0.0005, 0.001 for RMSProp for SSTs
 weight_decay = 0.0001 # 0.0001 for RMSProp
 momentum = 0.9
 l1_ratio = 1
@@ -123,7 +123,7 @@ test_node_feats = node_feat_grid_normalized[:, 840 + window_size - lead_time + 1
 # Define the model.
 #model, model_class = MultiGraphGCN(in_channels=graph_list[0].x[0].shape[0], hid_channels=30, out_channels=1, num_graphs=len(train_graph_list)), 'GCN'
 #model, model_class = MultiGraphGAT(in_channels=graph_list[0].x[0].shape[0], hid_channels=30, out_channels=1, num_heads=8, num_graphs=len(train_graph_list)), 'GAT'
-model, model_class = MultiGraphSage(in_channels=graph_list[0].x[0].shape[0], hid_channels=60, out_channels=1, num_graphs=len(train_graph_list), aggr='mean'), 'SAGE'
+model, model_class = MultiGraphSage(in_channels=graph_list[0].x[0].shape[0], hid_channels=15, out_channels=1, num_graphs=len(train_graph_list), aggr='mean'), 'SAGE'
 #model, model_class = MultiGraphGGCN(in_channels=graph_list[0].x[0].shape[0], hid_channels=30, out_channels=1, num_graphs=len(train_graph_list)), 'GGCN'
 # If directed graphs
 #model, model_class = MultiGraphRGCN(in_channels=graph_list[0].x[0].shape[0], hid_channels=50, out_channels=1, num_relations=2, num_bases=4), 'RGCN'
