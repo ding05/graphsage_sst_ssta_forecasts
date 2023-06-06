@@ -23,7 +23,7 @@ adj_filename = 'adj_mat_0.7.npy'
 
 window_size = 12
 lead_time = 1
-learning_rate = 0.001 # 0.01 for SSTs # 0.0005, 0.001 for RMSProp for SSTs
+learning_rate = 0.005 # 0.001 for SSTs with MSE # 0.0005, 0.001 for RMSProp for SSTs
 weight_decay = 0.0001 # 0.0001 for RMSProp
 momentum = 0.9
 l1_ratio = 1
@@ -132,6 +132,7 @@ model, model_class = MultiGraphSage(in_channels=graph_list[0].x[0].shape[0], hid
 # Define the loss function.
 #criterion = nn.MSELoss()
 criterion = BMCLoss(0.1)
+criterion_test = nn.MSELoss()
 
 # Define the optimizer.
 #optimizer = Adam(model.parameters(), lr=0.01)
@@ -179,7 +180,7 @@ for epoch in range(num_epochs):
         pred_node_feat_list = []
         for data in val_graph_list:
             output = model([data])
-            val_mse = criterion(output.squeeze(), torch.tensor(data.y).squeeze())
+            val_mse = criterion_test(output.squeeze(), torch.tensor(data.y).squeeze())
             print('Val predictions:', [round(i, 4) for i in output.squeeze().tolist()[::300]])
             print('Val observations:', [round(i, 4) for i in torch.tensor(data.y).squeeze().tolist()[::300]])
             val_mse_nodes += val_mse
@@ -237,7 +238,7 @@ with torch.no_grad():
     test_mse_nodes = 0
     for data in test_graph_list:
         output = model([data])
-        test_mse = criterion(output.squeeze(), torch.tensor(data.y).squeeze())
+        test_mse = criterion_test(output.squeeze(), torch.tensor(data.y).squeeze())
         print('Test predictions:', [round(i, 4) for i in output.squeeze().tolist()[::300]])
         print('Test observations:', [round(i, 4) for i in torch.tensor(data.y).squeeze().tolist()[::300]])
         test_mse_nodes += test_mse
