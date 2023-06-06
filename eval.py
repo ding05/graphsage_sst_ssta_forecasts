@@ -104,7 +104,7 @@ print('----------')
 print()
 
 # Define the model.
-model, model_class = MultiGraphSage(in_channels=graph_list[0].x[0].shape[0], hid_channels=30, out_channels=1, num_graphs=len(train_graph_list)), 'SAGE'
+model, model_class = MultiGraphSage(in_channels=graph_list[0].x[0].shape[0], hid_channels=15, out_channels=1, num_graphs=len(train_graph_list), aggr='mean'), 'SAGE'
 
 # Load the model.
 checkpoint = torch.load(models_path + saved_model)
