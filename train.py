@@ -1,4 +1,5 @@
 from utils.gnns import *
+from utils.bmse import *
 
 import numpy as np
 from numpy import asarray, save, load
@@ -129,7 +130,8 @@ model, model_class = MultiGraphSage(in_channels=graph_list[0].x[0].shape[0], hid
 #model, model_class = MultiGraphRGCN(in_channels=graph_list[0].x[0].shape[0], hid_channels=50, out_channels=1, num_relations=2, num_bases=4), 'RGCN'
 
 # Define the loss function.
-criterion = nn.MSELoss()
+#criterion = nn.MSELoss()
+criterion = BMCLoss(0.1)
 
 # Define the optimizer.
 #optimizer = Adam(model.parameters(), lr=0.01)
