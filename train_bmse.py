@@ -23,13 +23,13 @@ adj_filename = 'adj_mat_0.7.npy'
 
 window_size = 12
 lead_time = 1
-learning_rate = 0.001 # 0.001 for SSTs with MSE # 0.0005, 0.001 for RMSProp for SSTs
+learning_rate = 0.005 # 0.001 for SSTs with MSE # 0.0005, 0.001 for RMSProp for SSTs
 weight_decay = 0.0001 # 0.0001 for RMSProp
 momentum = 0.9
 l1_ratio = 1
-num_epochs = 200 #20
+num_epochs = 500 #20
 # Early stopping, if the validation MSE has not improved for "patience" epochs, stop training.
-patience = 20
+patience = 50
 min_val_mse = np.inf
 
 # Load the data.
@@ -130,8 +130,8 @@ model, model_class = MultiGraphSage(in_channels=graph_list[0].x[0].shape[0], hid
 #model, model_class = MultiGraphRGCN(in_channels=graph_list[0].x[0].shape[0], hid_channels=50, out_channels=1, num_relations=2, num_bases=4), 'RGCN'
 
 # Define the loss function.
-criterion = nn.MSELoss()
-#criterion = BMCLoss(0.1)
+#criterion = nn.MSELoss()
+criterion = BMCLoss(0.1)
 criterion_test = nn.MSELoss()
 
 # Define the optimizer.
