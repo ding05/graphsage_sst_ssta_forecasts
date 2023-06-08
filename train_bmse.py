@@ -152,6 +152,7 @@ start = time.time()
 # Record the results by epoch.
 loss_epochs = []
 val_mse_nodes_epochs = []
+noise_var_epochs = []
 # Early stopping starting counter
 counter = 0
 
@@ -160,7 +161,7 @@ for epoch in range(num_epochs):
     for data in train_graph_list:
         optimizer.zero_grad()
         output = model([data])
-        loss = criterion(output.squeeze(), torch.tensor(data.y).squeeze())
+        loss, noise_var = criterion(output.squeeze(), torch.tensor(data.y).squeeze())
         """
         # Elastic net
         l1_reg = 0.0
@@ -172,6 +173,7 @@ for epoch in range(num_epochs):
         """
         loss.backward()
         optimizer.step()
+        noise_var_epochs.append(noise_var)
     loss_epochs.append(loss.item())
 
     # Compute the MSE on the validation set.
@@ -205,6 +207,7 @@ for epoch in range(num_epochs):
     print('Validation MSE (calculated by row / time series at nodes): {:.4f}'.format(np.mean(gnn_mse)))
     print('Loss by epoch:', loss_epochs)
     print('Validation MSE by epoch:', val_mse_nodes_epochs)
+    print('Noise variable by epoch:', noise_var_epochs)
 
     # Update the best model weights if the current validation MSE is lower than the previous minimum.
     if val_mse_nodes.item() < min_val_mse:
