@@ -131,7 +131,7 @@ model, model_class = MultiGraphSage(in_channels=graph_list[0].x[0].shape[0], hid
 
 # Define the loss function.
 #criterion = nn.MSELoss()
-criterion = BMCLoss(0.1)
+criterion = BMCLoss(2.0)
 criterion_test = nn.MSELoss()
 
 # Define the optimizer.
