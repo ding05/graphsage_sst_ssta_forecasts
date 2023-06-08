@@ -23,7 +23,7 @@ adj_filename = 'adj_mat_0.7.npy'
 
 window_size = 12
 lead_time = 1
-learning_rate = 0.005 # 0.001 for SSTs with MSE # 0.0005, 0.001 for RMSProp for SSTs
+learning_rate = 0.01 # 0.001 for SSTs with MSE # 0.0005, 0.001 for RMSProp for SSTs
 weight_decay = 0.0001 # 0.0001 for RMSProp
 momentum = 0.9
 l1_ratio = 1
@@ -173,8 +173,8 @@ for epoch in range(num_epochs):
         """
         loss.backward()
         optimizer.step()
-        noise_var_epochs.append(noise_var)
     loss_epochs.append(loss.item())
+    noise_var_epochs.append(noise_var.item())
 
     # Compute the MSE on the validation set.
     with torch.no_grad():
