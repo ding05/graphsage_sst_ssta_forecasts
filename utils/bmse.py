@@ -18,7 +18,7 @@ def bmc_loss(pred, target, noise_var):
     #print('noise_var:', float(noise_var.detach()))
     loss = F.cross_entropy(logits, torch.arange(pred.shape[0]).float()) # contrastive-like loss
     loss = loss * (2 * noise_var).detach() # optional: restore the loss scale, 'detach' when noise is learnable 
-    return loss
+    return loss, noise_var
 
 class BMCLoss(torch.nn.Module):
     def __init__(self, init_noise_sigma):
