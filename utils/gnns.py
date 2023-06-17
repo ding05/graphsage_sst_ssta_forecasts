@@ -61,7 +61,9 @@ class MultiGraphSage_G(torch.nn.Module):
     def __init__(self, in_channels, hid_channels, out_channels, num_graphs, aggr='mean'):
         super(MultiGraphSage_G, self).__init__()
         self.convs = torch.nn.ModuleList([torch.nn.Sequential(SAGEConv(in_channels, hid_channels, aggr=aggr), SAGEConv(hid_channels, out_channels, aggr=aggr)) for _ in range(num_graphs)])
-        self.final_linear = nn.Linear(out_channels, 1)
+        #self.final_conv = torch.nn.Sequential(SAGEConv(out_channels * num_graphs, hid_channels, aggr=aggr), SAGEConv(hid_channels, 1, aggr=aggr))
+        self.final_linear = torch.nn.Sequential(torch.nn.Linear(out_channels, hid_channels), torch.nn.Linear(hid_channels, 1))
+        #self.final_linear = nn.Linear(out_channels, 1)
     def forward(self, data_list):
         x_list = []
         for i, data in enumerate(data_list):
