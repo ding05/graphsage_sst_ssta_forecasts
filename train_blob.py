@@ -20,7 +20,7 @@ node_feat_filename = 'node_feats_sst.npy'
 #node_feat_filename = 'node_feats_ssta.npy'
 adj_filename = 'adj_mat_0.7.npy'
 #adj_filename = 'adj_mat_0.9_directed.npy'
-y_filename = 'blob.npy'
+graph_y_filename = 'blob.npy'
 
 window_size = 12
 lead_time = 1
@@ -41,7 +41,7 @@ print('Shape:', node_feat_grid.shape)
 print('----------')
 print()
 
-y_seq = load(data_path + y_filename)
+y_seq = load(data_path + graph_y_filename)
 #print('Graph label sequence:', y_seq)
 print('Shape:', y_seq.shape)
 print('----------')
