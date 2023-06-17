@@ -16,19 +16,19 @@ data_path = 'data/'
 models_path = 'configs/'
 out_path = 'out/'
 
-node_feat_filename = 'node_feats_sst.npy'
-#node_y_filename = 'node_feats_ssta.npy'
+#node_feat_filename = 'node_feats_sst.npy'
+node_feat_filename = 'node_feats_ssta.npy'
 adj_filename = 'adj_mat_0.7.npy'
 #adj_filename = 'adj_mat_0.9_directed.npy'
 y_filename = 'blob.npy'
 
 window_size = 12
 lead_time = 1
-learning_rate = 0.001 # 0.001 for SSTs with MSE # 0.0005, 0.001 for RMSProp for SSTs
+learning_rate = 0.01 # 0.001 for SSTs with MSE # 0.0005, 0.001 for RMSProp for SSTs
 weight_decay = 0.0001 # 0.0001 for RMSProp
 momentum = 0.9
 l1_ratio = 1
-num_epochs = 1 #20
+num_epochs = 200 #20
 # Early stopping, if the validation MSE has not improved for "patience" epochs, stop training.
 patience = 20
 min_val_mse = np.inf
@@ -42,7 +42,7 @@ print('----------')
 print()
 
 y_seq = load(data_path + y_filename)
-print('Graph label sequence:', y_seq)
+#print('Graph label sequence:', y_seq)
 print('Shape:', y_seq.shape)
 print('----------')
 print()
@@ -181,8 +181,10 @@ for epoch in range(num_epochs):
         for data in val_graph_list:
             output = model([data])
             val_mse = criterion_test(output.squeeze(), torch.tensor(data.y).squeeze())
-            print('Val predictions:', [round(i, 4) for i in output.squeeze().tolist()[::300]])
-            print('Val observations:', [round(i, 4) for i in torch.tensor(data.y).squeeze().tolist()[::300]])
+            #print('Val predictions:', np.round(output.squeeze().numpy(), decimals=4))
+            #print('Val observations:', np.round(torch.tensor(data.y).squeeze().numpy(), decimals=4))
+            print('Val predictions:', output.squeeze())
+            print('Val observations:', torch.tensor(data.y).squeeze())
             val_mse_nodes += val_mse
             
             # The model output graph by graph, but we are interested in time series at node by node.
@@ -192,16 +194,16 @@ for epoch in range(num_epochs):
         val_mse_nodes /= len(val_graph_list)
         val_mse_nodes_epochs.append(val_mse_nodes.item())
         
-        pred_node_feat_tensor = torch.stack([tensor for tensor in pred_node_feat_list], dim=1)
+        pred_node_feat_tensor = torch.tensor(pred_node_feat_list)
         pred_node_feats = pred_node_feat_tensor.numpy()
-        gnn_mse = np.mean((pred_node_feats - test_node_feats) ** 2, axis=1)
+        gnn_mse = np.mean((pred_node_feats - test_node_feats) ** 2)
               
     print('----------')
     print()
 
     # Print the current epoch and validation MSE.
-    print('Epoch [{}/{}], Loss: {:.4f}, Validation MSE (calculated by column / graph): {:.4f}'.format(epoch + 1, num_epochs, loss.item(), val_mse_nodes))
-    print('MSEs by node:', gnn_mse)
+    print('Epoch [{}/{}], Loss: {:.4f}'.format(epoch + 1, num_epochs, loss.item()))
+    #print('MSEs by node:', gnn_mse)
     print('Validation MSE (calculated by row / time series at nodes): {:.4f}'.format(np.mean(gnn_mse)))
     print('Loss by epoch:', loss_epochs)
     print('Validation MSE by epoch:', val_mse_nodes_epochs)
