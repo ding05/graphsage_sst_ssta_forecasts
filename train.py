@@ -17,7 +17,9 @@ models_path = 'configs/'
 out_path = 'out/'
 
 node_feat_filename = 'node_feats_sst.npy'
-#node_y_filename = 'node_feats_ssta.npy'
+#node_feat_filename = 'node_feats_ssta.npy'
+#node_y_filename = 'blob.npy'
+graph_y_filename = 'blob.npy'
 adj_filename = 'adj_mat_0.7.npy'
 #adj_filename = 'adj_mat_0.9_directed.npy'
 
@@ -41,6 +43,15 @@ print('----------')
 print()
 
 #node_y_grid = load(data_path + node_y_filename)
+
+y_seq = load(data_path + graph_y_filename)
+y_grid = y_seq.reshape(-1, 1)
+y_grid = np.tile(y_grid, (1, node_feat_grid.shape[0]))
+y_grid = y_grid.T
+print('Graph label grid:', y_grid)
+print('Shape:', y_grid.shape)
+print('----------')
+print()
 
 """
 # Convert Kelvin to Celsius.
@@ -82,7 +93,9 @@ for time_i in range(num_time):
         #y.append(node_feat_grid[node_i][time_i + window_size + lead_time - 1])
         #y.append(node_y_grid[node_i][time_i + window_size + lead_time - 1])
         # The outputs are normalized node features.
-        y.append(node_feat_grid_normalized[node_i][time_i + window_size + lead_time - 1])
+        #y.append(node_feat_grid_normalized[node_i][time_i + window_size + lead_time - 1])
+        # The outputs are node labels.
+        y.append(y_grid[node_i][time_i + window_size + lead_time - 1])
     x = torch.tensor(x)
     # Generate incomplete graphs with the adjacency matrix.
     edge_index = torch.tensor(adj_mat, dtype=torch.long)
@@ -118,13 +131,15 @@ val_graph_list = graph_list[840:]
 test_graph_list = graph_list[840:]
 
 #test_node_feats = node_feat_grid[:, 840 + window_size - lead_time + 1:]
-test_node_feats = node_feat_grid_normalized[:, 840 + window_size - lead_time + 1:]
+#test_node_feats = node_feat_grid_normalized[:, 840 + window_size - lead_time + 1:]
 #test_node_feats = node_y_grid[:, 840 + window_size - lead_time + 1:]
+test_node_feats = y_grid[:, 840 + window_size - lead_time + 1:]
 
 # Define the model.
 #model, model_class = MultiGraphGCN(in_channels=graph_list[0].x[0].shape[0], hid_channels=30, out_channels=1, num_graphs=len(train_graph_list)), 'GCN'
 #model, model_class = MultiGraphGAT(in_channels=graph_list[0].x[0].shape[0], hid_channels=30, out_channels=1, num_heads=8, num_graphs=len(train_graph_list)), 'GAT'
-model, model_class = MultiGraphSage(in_channels=graph_list[0].x[0].shape[0], hid_channels=15, out_channels=1, num_graphs=len(train_graph_list), aggr='mean'), 'SAGE'
+#model, model_class = MultiGraphSage(in_channels=graph_list[0].x[0].shape[0], hid_channels=15, out_channels=1, num_graphs=len(train_graph_list), aggr='mean'), 'SAGE'
+model, model_class = MultiGraphSage(in_channels=graph_list[0].x[0].shape[0], hid_channels=15, out_channels=1, num_graphs=len(train_graph_list), aggr='mean'), 'SAGE_Blob'
 #model, model_class = MultiGraphGGCN(in_channels=graph_list[0].x[0].shape[0], hid_channels=30, out_channels=1, num_graphs=len(train_graph_list)), 'GGCN'
 # If directed graphs
 #model, model_class = MultiGraphRGCN(in_channels=graph_list[0].x[0].shape[0], hid_channels=50, out_channels=1, num_relations=2, num_bases=4), 'RGCN'

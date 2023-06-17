@@ -16,8 +16,8 @@ data_path = 'data/'
 models_path = 'configs/'
 out_path = 'out/'
 
-#node_feat_filename = 'node_feats_sst.npy'
-node_feat_filename = 'node_feats_ssta.npy'
+node_feat_filename = 'node_feats_sst.npy'
+#node_feat_filename = 'node_feats_ssta.npy'
 adj_filename = 'adj_mat_0.7.npy'
 #adj_filename = 'adj_mat_0.9_directed.npy'
 y_filename = 'blob.npy'
@@ -100,7 +100,7 @@ for time_i in range(num_time):
     # If an empty adjacency matrix
     #data = Data(x=x, y=y, num_nodes=node_feat_grid.shape[0], num_edges=adj_mat.shape[1], has_isolated_nodes=True, has_self_loops=False, is_undirected=True)
     # If directed graphs
-    edge_attr = torch.ones(edge_index.shape[1], dtype=torch.float)
+    #edge_attr = torch.ones(edge_index.shape[1], dtype=torch.float)
     #data = Data(x=x, y=y, edge_index=edge_index, edge_attr=edge_attr, num_nodes=node_feat_grid.shape[0], num_edges=adj_mat.shape[1], has_isolated_nodes=True, has_self_loops=False, is_undirected=False)
     graph_list.append(data)
 
@@ -127,7 +127,7 @@ test_node_feats = y_seq[840 + window_size - lead_time + 1:]
 #test_node_feats = node_y_grid[:, 840 + window_size - lead_time + 1:]
 
 # Define the model.
-model, model_class = MultiGraphSage_G(in_channels=graph_list[0].x[0].shape[0], hid_channels=15, out_channels=1, num_graphs=len(train_graph_list), aggr='mean'), 'SAGE_Blob'
+model, model_class = MultiGraphSage_G(in_channels=graph_list[0].x[0].shape[0], hid_channels=15, hid_channels_2=60, out_channels=1, num_graphs=len(train_graph_list), aggr='mean'), 'SAGE_Blob'
 
 # Define the loss function.
 criterion = nn.MSELoss()
