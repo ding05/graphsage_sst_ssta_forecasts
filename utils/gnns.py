@@ -56,6 +56,24 @@ class MultiGraphSage(torch.nn.Module):
         x_concat = torch.cat(x_list, dim=0)
         return x_concat
 
+# If outputing one value
+class MultiGraphSage_G(torch.nn.Module):
+    def __init__(self, in_channels, hid_channels, out_channels, num_graphs, aggr='mean'):
+        super(MultiGraphSage_G, self).__init__()
+        self.convs = torch.nn.ModuleList([torch.nn.Sequential(SAGEConv(in_channels, hid_channels, aggr=aggr), SAGEConv(hid_channels, out_channels, aggr=aggr)) for _ in range(num_graphs)])
+        self.final_linear = nn.Linear(out_channels, 1)
+    def forward(self, data_list):
+        x_list = []
+        for i, data in enumerate(data_list):
+            x = data.x
+            for j, layer in enumerate(self.convs[i]):
+                x = layer(x, data.edge_index)
+                x = torch.tanh(x)
+            x_list.append(x)
+        x_concat = torch.cat(x_list, dim=0)
+        x_final = self.final_linear(x_concat)
+        return x_final.mean()
+
 class MultiGraphGGCN(torch.nn.Module):
     def __init__(self, in_channels, hid_channels, out_channels, num_graphs):
         super(MultiGraphGGCN, self).__init__()
