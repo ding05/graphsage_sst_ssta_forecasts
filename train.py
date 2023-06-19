@@ -18,9 +18,9 @@ out_path = 'out/'
 
 node_feat_filename = 'node_feats_sst.npy'
 #node_feat_filename = 'node_feats_ssta.npy'
+node_y_filename = 'node_feats_ssta.npy'
 #node_y_filename = 'blob.npy'
-graph_y_filename = 'blob.npy'
-#graph_y_filename = 'node_feats_ssta.npy'
+#graph_y_filename = 'blob.npy'
 adj_filename = 'adj_mat_0.7.npy'
 #adj_filename = 'adj_mat_0.9_directed.npy'
 
@@ -43,14 +43,15 @@ print('Shape:', node_feat_grid.shape)
 print('----------')
 print()
 
-#node_y_grid = load(data_path + node_y_filename)
-
+node_y_grid = load(data_path + node_y_filename)
+"""
 y_seq = load(data_path + graph_y_filename)
-y_grid = y_seq.reshape(-1, 1)
-y_grid = np.tile(y_grid, (1, node_feat_grid.shape[0]))
-y_grid = y_grid.T
-print('Graph label grid:', y_grid)
-print('Shape:', y_grid.shape)
+node_y_grid = y_seq.reshape(-1, 1)
+node_y_grid = np.tile(node_y_grid, (1, node_feat_grid.shape[0]))
+node_y_grid = node_y_grid.T
+"""
+print('Graph label grid:', node_y_grid)
+print('Shape:', node_y_grid.shape)
 print('----------')
 print()
 
@@ -92,11 +93,10 @@ for time_i in range(num_time):
         x.append(node_feat_grid_normalized[node_i][time_i : time_i + window_size])
         # The outputs are node features in Kelvin.
         #y.append(node_feat_grid[node_i][time_i + window_size + lead_time - 1])
-        #y.append(node_y_grid[node_i][time_i + window_size + lead_time - 1])
+        y.append(node_y_grid[node_i][time_i + window_size + lead_time - 1])
         # The outputs are normalized node features.
         #y.append(node_feat_grid_normalized[node_i][time_i + window_size + lead_time - 1])
         # The outputs are node labels.
-        y.append(y_grid[node_i][time_i + window_size + lead_time - 1])
     x = torch.tensor(x)
     # Generate incomplete graphs with the adjacency matrix.
     edge_index = torch.tensor(adj_mat, dtype=torch.long)
@@ -133,8 +133,7 @@ test_graph_list = graph_list[840:]
 
 #test_node_feats = node_feat_grid[:, 840 + window_size - lead_time + 1:]
 #test_node_feats = node_feat_grid_normalized[:, 840 + window_size - lead_time + 1:]
-#test_node_feats = node_y_grid[:, 840 + window_size - lead_time + 1:]
-test_node_feats = y_grid[:, 840 + window_size - lead_time + 1:]
+test_node_feats = node_y_grid[:, 840 + window_size - lead_time + 1:]
 
 # Define the model.
 #model, model_class = MultiGraphGCN(in_channels=graph_list[0].x[0].shape[0], hid_channels=30, out_channels=1, num_graphs=len(train_graph_list)), 'GCN'
