@@ -20,6 +20,7 @@ node_feat_filename = 'node_feats_sst.npy'
 #node_feat_filename = 'node_feats_ssta.npy'
 #node_y_filename = 'blob.npy'
 graph_y_filename = 'blob.npy'
+#graph_y_filename = 'node_feats_ssta.npy'
 adj_filename = 'adj_mat_0.7.npy'
 #adj_filename = 'adj_mat_0.9_directed.npy'
 
