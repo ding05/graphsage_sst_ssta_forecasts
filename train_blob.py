@@ -127,7 +127,7 @@ test_node_feats = y_seq[840 + window_size - lead_time + 1:]
 #test_node_feats = node_y_grid[:, 840 + window_size - lead_time + 1:]
 
 # Define the model.
-model, model_class = MultiGraphSage_G(in_channels=graph_list[0].x[0].shape[0], hid_channels=15, hid_channels_2=60, out_channels=1, num_graphs=len(train_graph_list), aggr='mean'), 'SAGE_Blob'
+model, model_class = MultiGraphSage_G(in_channels=graph_list[0].x[0].shape[0], hid_channels=15, hid_channels_2=60, out_channels=1, num_graphs=len(train_graph_list), aggr='mean'), 'SAGE_FCN_Blob'
 
 # Define the loss function.
 criterion = nn.MSELoss()
