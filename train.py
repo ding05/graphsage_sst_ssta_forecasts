@@ -30,7 +30,7 @@ learning_rate = 0.001 # 0.001 for SSTs with MSE # 0.0005, 0.001 for RMSProp for 
 weight_decay = 0.0001 # 0.0001 for RMSProp
 momentum = 0.9
 l1_ratio = 1
-num_epochs = 200 #20
+num_epochs = 400 #20
 # Early stopping, if the validation MSE has not improved for "patience" epochs, stop training.
 patience = 20
 min_val_mse = np.inf
@@ -218,8 +218,11 @@ for epoch in range(num_epochs):
     print('Epoch [{}/{}], Loss: {:.4f}, Validation MSE (calculated by column / graph): {:.4f}'.format(epoch + 1, num_epochs, loss.item(), val_mse_nodes))
     print('MSEs by node:', gnn_mse)
     print('Validation MSE (calculated by row / time series at nodes): {:.4f}'.format(np.mean(gnn_mse)))
-    print('Loss by epoch:', loss_epochs)
-    print('Validation MSE by epoch:', val_mse_nodes_epochs)
+    #print('Loss by epoch:', loss_epochs)
+    print('Loss by epoch:', ['{:.6f}'.format(loss) for loss in loss_epochs])
+    #print('Validation MSE by epoch:', val_mse_nodes_epochs)
+    print('Loss by epoch:', ['{:.6f}'.format(val_mse) for val_mse in val_mse_nodes_epochs])
+    print('Persistence MSE:', ((test_node_feats[:,1:] - test_node_feats[:,:-1])**2).mean())
 
     # Update the best model weights if the current validation MSE is lower than the previous minimum.
     if val_mse_nodes.item() < min_val_mse:
