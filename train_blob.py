@@ -206,9 +206,9 @@ for epoch in range(num_epochs):
     #print('MSEs by node:', gnn_mse)
     print('Validation MSE (calculated by row / time series at nodes): {:.4f}'.format(np.mean(gnn_mse)))
     #print('Loss by epoch:', loss_epochs)
-    print('Loss by epoch:', ['{:.4f}'.format(loss) for loss in loss_epochs])
+    print('Loss by epoch:', [float('{:.4f}'.format(loss)) for loss in loss_epochs])
     #print('Validation MSE by epoch:', val_mse_nodes_epochs)
-    print('Loss by epoch:', ['{:.4f}'.format(val_mse) for val_mse in val_mse_nodes_epochs])
+    print('Loss by epoch:', [float('{:.4f}'.format(val_mse)) for val_mse in val_mse_nodes_epochs])
 
     # Update the best model weights if the current validation MSE is lower than the previous minimum.
     if val_mse_nodes.item() < min_val_mse:
