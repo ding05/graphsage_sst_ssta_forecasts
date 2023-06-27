@@ -209,9 +209,9 @@ for epoch in range(num_epochs):
     #print('Loss by epoch:', loss_epochs)
     print('Loss by epoch:', [float('{:.6f}'.format(loss)) for loss in loss_epochs])
     #print('Validation MSE by epoch:', val_mse_nodes_epochs)
-    print('Loss by epoch:', [float('{:.6f}'.format(val_mse)) for val_mse in val_mse_nodes_epochs])
+    print('Validation MSE by epoch:', [float('{:.6f}'.format(val_mse)) for val_mse in val_mse_nodes_epochs])
     #print('Noise variable by epoch:', noise_var_epochs)
-    print('Loss by epoch:', [float('{:.4f}'.format(noise_var)) for noise_var in noise_var_epochs])
+    print('Noise variable by epoch:', [float('{:.4f}'.format(noise_var)) for noise_var in noise_var_epochs])
 
     # Update the best model weights if the current validation MSE is lower than the previous minimum.
     if val_mse_nodes.item() < min_val_mse:
