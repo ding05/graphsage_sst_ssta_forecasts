@@ -67,11 +67,27 @@ print('--------------------')
 
 # Convert SSTs into SSTAs and save them into NumPy files.
 
+"""
 converted_node_filename = 'node_feats_ssta.npy'
 
 converted_node_feat_grid = []
 for row in node_feat_grid:
   converted_node_feat_grid.append(get_ssta(row, train_num_year))
+converted_node_feat_grid = np.array(converted_node_feat_grid)
+
+print('ERA5 Globe SSTAs in NumPy:', converted_node_feat_grid)
+print('----------')
+print("ERA5 Globe SSTAs' shape:", converted_node_feat_grid.shape)
+print('--------------------')
+
+np.save(data_path + converted_node_filename, converted_node_feat_grid)
+"""
+
+converted_node_filename = 'node_feats_ssta_1980_2010.npy'
+
+converted_node_feat_grid = []
+for row in node_feat_grid:
+  converted_node_feat_grid.append(get_ssta_1980_2010(row))
 converted_node_feat_grid = np.array(converted_node_feat_grid)
 
 print('ERA5 Globe SSTAs in NumPy:', converted_node_feat_grid)
