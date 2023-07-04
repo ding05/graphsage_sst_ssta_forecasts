@@ -17,11 +17,13 @@ models_path = 'configs/'
 out_path = 'out/'
 
 #node_feat_filename = 'node_feats_sst.npy'
-node_feat_filename = 'node_feats_ssta.npy'
+#node_feat_filename = 'node_feats_ssta.npy'
+node_feat_filename = 'node_feats_ssta_1980_2010.npy'
 #node_y_filename = 'node_feats_ssta.npy'
 #node_y_filename = 'blob.npy'
 #graph_y_filename = 'blob.npy'
-adj_filename = 'adj_mat_0.7.npy'
+#adj_filename = 'adj_mat_0.7.npy'
+adj_filename = 'adj_mat_0.7_100.npy'
 #adj_filename = 'adj_mat_0.9_directed.npy'
 
 window_size = 12
@@ -32,7 +34,7 @@ momentum = 0.9
 l1_ratio = 1
 num_epochs = 1000 #400 #200
 # Early stopping, if the validation MSE has not improved for "patience" epochs, stop training.
-patience = 40 #20
+patience = 100 #40, 20
 min_val_mse = np.inf
 
 # Load the data.
@@ -65,9 +67,9 @@ print()
 """
 
 # Normalize the data to [-1, 1].
-#node_feat_grid_normalized = (node_feat_grid - np.min(node_feat_grid[:,:840])) / (np.max(node_feat_grid[:,:840]) - np.min(node_feat_grid[:,:840])) * 2 - 1
+#node_feat_grid_normalized = (node_feat_grid - np.min(node_feat_grid[:,:852])) / (np.max(node_feat_grid[:,:852]) - np.min(node_feat_grid[:,:852])) * 2 - 1
 # Normalize the data to [0, 1].
-node_feat_grid_normalized = (node_feat_grid - np.min(node_feat_grid[:,:840])) / (np.max(node_feat_grid[:,:840]) - np.min(node_feat_grid[:,:840]))
+node_feat_grid_normalized = (node_feat_grid - np.min(node_feat_grid[:,:852])) / (np.max(node_feat_grid[:,:852]) - np.min(node_feat_grid[:,:852]))
 print('Normalized node feature grid:', node_feat_grid_normalized)
 print('Shape:', node_feat_grid_normalized.shape)
 print('----------')
@@ -124,8 +126,8 @@ print('Check if they match those in the normalized node features:', node_feat_gr
 print('----------')
 print()
 
-# Split the data, following Taylor & Feng, 2022. Use the first 840 time steps.
-# Updated 03/2023, the new ERA5 dataset started from 1940. Use the first 840 time steps (1940-2009).
+# Split the data.
+# Updated 03/2023, the new ERA5 dataset started from 1940. Use the first 840 time steps (1941-2010) of the graph set for training.
 
 train_graph_list = graph_list[:840]
 val_graph_list = graph_list[840:]
