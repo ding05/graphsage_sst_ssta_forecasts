@@ -46,8 +46,8 @@ print()
 # Compute the total number of time steps.
 num_time = node_feat_grid.shape[1] - window_size - 1 + 1
 
-#for lead_time in [2, 3, 6, 12, 18, 24]:
-for lead_time in [2]:
+for lead_time in [2, 3, 6, 12, 18, 24]:
+#for lead_time in [24]:
     
     # Generate PyG graphs from NumPy arrays.
     graph_list = []
@@ -93,7 +93,10 @@ for lead_time in [2]:
     train_graph_list = graph_list[:840]
     test_graph_list = graph_list[840:]
     
-    test_node_feats = node_feat_grid_normalized[:, 840 + window_size - lead_time + 1:]
+    test_node_feats = node_feat_grid_normalized[:, 840 + window_size + lead_time - 1:]
+    print("Observations' shape:", test_node_feats.shape)
+    print('----------')
+    print()
     
     # Define the model.
     model, model_class = MultiGraphSage(in_channels=graph_list[0].x[0].shape[0], hid_channels=15, out_channels=1, num_graphs=len(train_graph_list), aggr='mean'), 'SAGE'
