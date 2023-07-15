@@ -112,7 +112,7 @@ for lead_time in [2, 3, 6, 12, 18, 24]:
     predictions = []
     
     # Use a loop to iterate over every starting time.
-    for time in range(node_feat_grid.shape[1] - (840 + window_size - lead_time + 1) - lead_time):
+    for time in range(node_feat_grid.shape[1] - (840 + window_size + lead_time - 1)):
     
         # Extract strating test input features.
         start_test_input_graph_list = [graph_list[time]]
