@@ -18,7 +18,7 @@ out_path = 'out/'
 node_feat_filename = 'node_feats_sst.npy'
 adj_filename = 'adj_mat_0.7.npy'
 
-saved_model = 'SAGE_0.7_1687694656.466807'
+saved_model = 'SAGE_0.7_1688867785.0908325'
 
 window_size = 12
 lead_time = 24
@@ -32,7 +32,7 @@ print('----------')
 print()
 
 # Normalize the data to [0, 1].
-node_feat_grid_normalized = (node_feat_grid - np.min(node_feat_grid[:,:840])) / (np.max(node_feat_grid[:,:840]) - np.min(node_feat_grid[:,:840]))
+node_feat_grid_normalized = (node_feat_grid - np.min(node_feat_grid[:,:852])) / (np.max(node_feat_grid[:,:852]) - np.min(node_feat_grid[:,:852]))
 print('Normalized node feature grid:', node_feat_grid_normalized)
 print('Shape:', node_feat_grid_normalized.shape)
 print('----------')
