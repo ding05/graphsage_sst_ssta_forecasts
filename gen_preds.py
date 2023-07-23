@@ -168,5 +168,5 @@ for lead_time in [2, 3, 6, 12, 18, 24]:
     print('--------------------')
     print()
     
-    save(out_path + saved_model + '_' + adj_filename[8:-4] + '_preds_' + str(lead_time) + '.npy', prediction_array)
-    save(out_path + saved_model + '_' + adj_filename[8:-4] + '_testobs_' + str(lead_time) + '.npy', test_node_feats)
+    save(out_path + saved_model + '_' + adj_filename[8:-4] + '_' + str(lead_time) + '_preds.npy', prediction_array)
+    save(out_path + saved_model + '_' + adj_filename[8:-4] + '_' + str(lead_time) + '_testobs.npy', test_node_feats)
