@@ -22,8 +22,8 @@ node_feat_filename = 'node_feats_ssta_1980_2010.npy'
 #node_y_filename = 'node_feats_ssta.npy'
 #node_y_filename = 'blob.npy'
 #graph_y_filename = 'blob.npy'
-#adj_filename = 'adj_mat_0.7.npy'
-adj_filename = 'adj_mat_0.7_100.npy'
+adj_filename = 'adj_mat_0.85.npy'
+#adj_filename = 'adj_mat_0.9_100.npy'
 #adj_filename = 'adj_mat_0.9_directed.npy'
 
 window_size = 12
@@ -32,9 +32,9 @@ learning_rate = 0.001 # 0.001 for SSTs with MSE # 0.0005, 0.001 for RMSProp for 
 weight_decay = 0.0001 # 0.0001 for RMSProp
 momentum = 0.9
 l1_ratio = 1
-num_epochs = 1000 #400 #200
+num_epochs = 400 #1000, 400, 200
 # Early stopping, if the validation MSE has not improved for "patience" epochs, stop training.
-patience = 100 #40, 20
+patience = num_epochs #100, 40, 20
 min_val_mse = np.inf
 
 # Load the data.
@@ -136,6 +136,12 @@ test_graph_list = graph_list[840:]
 #test_node_feats = node_feat_grid[:, 840 + window_size - lead_time + 1:]
 test_node_feats = node_feat_grid_normalized[:, 840 + window_size - lead_time + 1:]
 #test_node_feats = node_y_grid[:, 840 + window_size - lead_time + 1:]
+
+# Compute the percentiles using the training set only.
+node_feats_90 = np.percentile(node_feat_grid[:, :840], 90, axis=1)
+node_feats_95 = np.percentile(node_feat_grid[:, :840], 95, axis=1)
+node_feats_normalized_90 = np.percentile(node_feat_grid_normalized[:, :840], 90, axis=1)
+node_feats_normalized_95 = np.percentile(node_feat_grid_normalized[:, :840], 95, axis=1)
 
 # Define the model.
 #model, model_class = MultiGraphGCN(in_channels=graph_list[0].x[0].shape[0], hid_channels=30, out_channels=1, num_graphs=len(train_graph_list)), 'GCN'
