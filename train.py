@@ -1,5 +1,6 @@
 from utils.gnns import *
 from utils.bmse import *
+from utils.process_utils import *
 
 import numpy as np
 from numpy import asarray, save, load
@@ -104,7 +105,7 @@ for time_i in range(num_time):
     # Generate incomplete graphs with the adjacency matrix.
     edge_index = torch.tensor(adj_mat, dtype=torch.long)
     # Sort the edge index for the LSTM aggregator for the GraphSAGE.
-    #edge_index = sort_edge_index(edge_index)
+    edge_index = sort_by_destination(edge_index)
     data = Data(x=x, y=y, edge_index=edge_index, num_nodes=node_feat_grid.shape[0], num_edges=adj_mat.shape[1], has_isolated_nodes=True, has_self_loops=False, is_undirected=True)
     # Generate complete graphs.
     #node_indices = torch.arange(node_feat_grid.shape[0])
@@ -149,7 +150,7 @@ node_feats_normalized_95 = np.percentile(node_feat_grid_normalized[:, :840], 95,
 # Define the model.
 #model, model_class = MultiGraphGCN(in_channels=graph_list[0].x[0].shape[0], hid_channels=30, out_channels=1, num_graphs=len(train_graph_list)), 'GCN'
 #model, model_class = MultiGraphGAT(in_channels=graph_list[0].x[0].shape[0], hid_channels=30, out_channels=1, num_heads=8, num_graphs=len(train_graph_list)), 'GAT'
-model, model_class = MultiGraphSage(in_channels=graph_list[0].x[0].shape[0], hid_channels=15, out_channels=1, num_graphs=len(train_graph_list), aggr='max'), 'SAGE'
+model, model_class = MultiGraphSage(in_channels=graph_list[0].x[0].shape[0], hid_channels=15, out_channels=1, num_graphs=len(train_graph_list), aggr='lstm'), 'SAGE'
 #model, model_class = MultiGraphSage(in_channels=graph_list[0].x[0].shape[0], hid_channels=15, out_channels=1, num_graphs=len(train_graph_list), aggr='mean'), 'SAGE_Blob'
 #model, model_class = MultiGraphGGCN(in_channels=graph_list[0].x[0].shape[0], hid_channels=30, out_channels=1, num_graphs=len(train_graph_list)), 'GGCN'
 # If directed graphs
