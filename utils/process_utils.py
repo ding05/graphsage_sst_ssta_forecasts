@@ -37,3 +37,11 @@ def extract_y(lat, lon, filename, data_path):
 
 def avg(list):
     return sum(list) / len(list)
+
+# Sort the edge index tensor to be column-wise for the LSTM aggregator. 
+def sort_by_destination(edge_index):
+    edges = edge_index.t()
+    sorted_indices = torch.argsort(edges[:, 1], dim=0)
+    sorted_edges = edges[sorted_indices]
+    sorted_edge_index = sorted_edges.t()
+    return sorted_edge_index
