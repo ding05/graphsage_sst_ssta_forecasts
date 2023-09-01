@@ -76,6 +76,25 @@ class MultiGraphSage_G(torch.nn.Module):
         x_final = self.final_linear(x_concat)
         return x_final.mean()
 
+# If adding an LSTM layer
+class MultiGraphSage_LSTM(torch.nn.Module):
+    def __init__(self, in_channels, hid_channels, out_channels, num_graphs, aggr='mean'):
+        super(MultiGraphSage_LSTM, self).__init__()
+        self.convs = torch.nn.ModuleList([torch.nn.Sequential(SAGEConv(in_channels, hid_channels, aggr=aggr), SAGEConv(hid_channels, out_channels, aggr=aggr)) for _ in range(num_graphs)])
+        #self.double()
+        self.lstm = nn.LSTM(input_size=out_channels, hidden_size=out_channels, batch_first=True)
+    def forward(self, data_list):
+        x_list = []
+        for i, data in enumerate(data_list):
+            x = data.x
+            for j, layer in enumerate(self.convs[i]):
+                x = layer(x, data.edge_index)
+                x = torch.tanh(x)
+            x_list.append(x)
+        x_seq = torch.stack(x_list)
+        lstm_out, _ = self.lstm(x_seq)
+        return lstm_out
+
 class MultiGraphGGCN(torch.nn.Module):
     def __init__(self, in_channels, hid_channels, out_channels, num_graphs):
         super(MultiGraphGGCN, self).__init__()
