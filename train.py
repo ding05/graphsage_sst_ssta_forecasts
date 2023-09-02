@@ -38,6 +38,8 @@ num_epochs = 400 #1000, 400, 200
 # Early stopping, if the validation MSE has not improved for "patience" epochs, stop training.
 patience = num_epochs #100, 40, 20
 min_val_mse = np.inf
+# For GraphSAGE-LSTM
+sequence_length = 24
 
 # Load the data.
 
@@ -185,21 +187,34 @@ counter = 0
 
 for epoch in range(num_epochs):
     # Iterate over the training data.
-    for data in train_graph_list:
-        optimizer.zero_grad()
-        output = model([data])
-        loss = criterion(output.squeeze(), torch.tensor(data.y).squeeze())
-        """
-        # Elastic net
-        l1_reg = 0.0
-        l2_reg = 0.0
-        for param in model.parameters():
-            l1_reg += torch.norm(param, 1)
-            l2_reg += torch.norm(param, 2)
-        loss += weight_decay * (l1_ratio * l1_reg + (1 - l1_ratio) * l2_reg)
-        """
-        loss.backward()
-        optimizer.step()
+    if model_class != 'SAGE_LSTM':
+        for data in train_graph_list:
+            optimizer.zero_grad()
+            output = model([data])
+            loss = criterion(output.squeeze(), torch.tensor(data.y).squeeze())
+            """
+            # Elastic net
+            l1_reg = 0.0
+            l2_reg = 0.0
+            for param in model.parameters():
+                l1_reg += torch.norm(param, 1)
+                l2_reg += torch.norm(param, 2)
+            loss += weight_decay * (l1_ratio * l1_reg + (1 - l1_ratio) * l2_reg)
+            """
+            loss.backward()
+            optimizer.step()
+    else:
+        print('Special case: GraphSAGE-LSTM')
+        print('----------')
+        print()
+        for i in range(0, len(train_graph_list) - sequence_length):
+            data_sequence = train_graph_list[i:i+sequence_length]
+            target_data = train_graph_list[i+sequence_length]
+            optimizer.zero_grad()
+            output = model([data_sequence])
+            loss = criterion(output, torch.tensor(target_data.y).squeeze())
+            loss.backward()
+            optimizer.step()
     loss_epochs.append(loss.item())
 
     # Compute the MSE on the validation set.
