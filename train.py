@@ -204,9 +204,10 @@ for epoch in range(num_epochs):
             loss.backward()
             optimizer.step()
     else:
-        print('Special case: GraphSAGE-LSTM')
-        print('----------')
-        print()
+        if epoch == 0:
+            print('Special case: GraphSAGE-LSTM')
+            print('----------')
+            print()
         for i in range(0, len(train_graph_list) - sequence_length):
             data_sequence = train_graph_list[i:i+sequence_length]
             target_data = train_graph_list[i+sequence_length]
@@ -221,23 +222,45 @@ for epoch in range(num_epochs):
     with torch.no_grad():
         val_mse_nodes = 0
         pred_node_feat_list = []
-        for data in val_graph_list:
-            output = model([data])
-            val_mse = criterion_test(output.squeeze(), torch.tensor(data.y).squeeze())
-            print('Val predictions:', [round(i, 4) for i in output.squeeze().tolist()[::300]])
-            print('Val observations:', [round(i, 4) for i in torch.tensor(data.y).squeeze().tolist()[::300]])
-            val_mse_nodes += val_mse
+        
+        if model_class != 'SAGE_LSTM':
+            for data in val_graph_list:
+                output = model([data])
+                val_mse = criterion_test(output.squeeze(), torch.tensor(data.y).squeeze())
+                print('Val predictions:', [round(i, 4) for i in output.squeeze().tolist()[::300]])
+                print('Val observations:', [round(i, 4) for i in torch.tensor(data.y).squeeze().tolist()[::300]])
+                val_mse_nodes += val_mse
+                
+                # The model output graph by graph, but we are interested in time series at node by node.
+                # Transform the shapes.
+                pred_node_feat_list.append(output.squeeze())
+
+            val_mse_nodes /= len(val_graph_list)
+            val_mse_nodes_epochs.append(val_mse_nodes.item())
             
-            # The model output graph by graph, but we are interested in time series at node by node.
-            # Transform the shapes.
-            pred_node_feat_list.append(output.squeeze())
+            pred_node_feat_tensor = torch.stack([tensor for tensor in pred_node_feat_list], dim=1)
+            pred_node_feats = pred_node_feat_tensor.numpy()
+            gnn_mse = np.mean((pred_node_feats - test_node_feats) ** 2, axis=1)
         
-        val_mse_nodes /= len(val_graph_list)
-        val_mse_nodes_epochs.append(val_mse_nodes.item())
-        
-        pred_node_feat_tensor = torch.stack([tensor for tensor in pred_node_feat_list], dim=1)
-        pred_node_feats = pred_node_feat_tensor.numpy()
-        gnn_mse = np.mean((pred_node_feats - test_node_feats) ** 2, axis=1)
+        else:
+            for i in range(0, len(val_graph_list) - sequence_length):
+                data_sequence = val_graph_list[i:i+sequence_length]
+                target_data = val_graph_list[i+sequence_length]
+                output = model([data_sequence])
+                val_mse = criterion_test(output, torch.tensor(target_data.y).squeeze())
+                print('Val predictions:', [round(i, 4) for i in output.squeeze().tolist()[::300]])
+                print('Val observations:', [round(i, 4) for i in torch.tensor(target_data.y).squeeze().tolist()[::300]])
+                val_mse_nodes += val_mse
+                
+                pred_node_feat_list.append(output.squeeze())
+
+            val_mse_nodes /= len(val_graph_list)
+            val_mse_nodes_epochs.append(val_mse_nodes.item())
+            
+            pred_node_feat_tensor = torch.stack([tensor for tensor in pred_node_feat_list], dim=1)
+            pred_node_feats = pred_node_feat_tensor.numpy()
+            test_node_feats_aligned = test_node_feats[:, :pred_node_feats.shape[1]]
+            gnn_mse = np.mean((pred_node_feats - test_node_feats_aligned) ** 2, axis=1)
               
     print('----------')
     print()
