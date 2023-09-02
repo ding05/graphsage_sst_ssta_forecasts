@@ -83,18 +83,24 @@ class MultiGraphSage_LSTM(torch.nn.Module):
         self.convs = torch.nn.ModuleList([torch.nn.Sequential(SAGEConv(in_channels, hid_channels, aggr=aggr), SAGEConv(hid_channels, out_channels, aggr=aggr)) for _ in range(num_graphs)])
         #self.double()
         self.lstm = nn.LSTM(input_size=out_channels, hidden_size=out_channels, batch_first=True)
-    def forward(self, data_list):
-        x_list = []
-        for i, data in enumerate(data_list):
-            x = data.x
-            for j, layer in enumerate(self.convs[i]):
-                x = layer(x, data.edge_index)
-                x = torch.tanh(x)
-            x_list.append(x)
-        # Transpose to get sequences for each node.
-        x_seq = torch.stack(x_list).transpose(0, 1)  # x_seq's shape: (num_nodes, sequence_length, feature_size)
-        lstm_out, _ = self.lstm(x_seq)
-        return lstm_out
+    def forward(self, data_sequence):
+        x_seq_list = []
+        for data_list in data_sequence:
+            x_list = []
+            for i, data in enumerate(data_list):
+                x = data.x
+                for j, layer in enumerate(self.convs[i]):
+                    x = layer(x, data.edge_index)
+                    x = torch.tanh(x)
+                x_list.append(x)
+            # Transpose to get sequences for each node.
+            x_seq = torch.stack(x_list).transpose(0, 1) # x_seq's shape: (num_nodes, sequence_length, feature_size)
+            x_seq_list.append(x_seq)
+        # Combine sequences for the batch.    
+        lstm_input = torch.cat(x_seq_list, dim=0)
+        lstm_out, _ = self.lstm(lstm_input)
+        # Only return the last timestep's prediction for each sequence.
+        return lstm_out[:, -1, :].squeeze()
 
 class MultiGraphGGCN(torch.nn.Module):
     def __init__(self, in_channels, hid_channels, out_channels, num_graphs):
