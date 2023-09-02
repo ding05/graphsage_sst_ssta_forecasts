@@ -30,7 +30,8 @@ adj_filename = 'adj_mat_0.9.npy'
 
 window_size = 12
 lead_time = 1
-learning_rate = 0.001 # 0.001 for SSTs with MSE # 0.0005, 0.001 for RMSProp for SSTs
+#learning_rate = 0.001 # 0.001 for SSTs with MSE # 0.0005, 0.001 for RMSProp for SSTs
+learning_rate = 0.01 # For the GraphSAGE-LSTM
 weight_decay = 0.0001 # 0.0001 for RMSProp
 momentum = 0.9
 l1_ratio = 1
@@ -38,7 +39,7 @@ num_epochs = 400 #1000, 400, 200
 # Early stopping, if the validation MSE has not improved for "patience" epochs, stop training.
 patience = num_epochs #100, 40, 20
 min_val_mse = np.inf
-# For GraphSAGE-LSTM
+# For the GraphSAGE-LSTM
 sequence_length = 12
 
 # Load the data.
