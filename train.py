@@ -39,7 +39,7 @@ num_epochs = 400 #1000, 400, 200
 patience = num_epochs #100, 40, 20
 min_val_mse = np.inf
 # For GraphSAGE-LSTM
-sequence_length = 24
+sequence_length = 12
 
 # Load the data.
 
@@ -259,8 +259,10 @@ for epoch in range(num_epochs):
             
             pred_node_feat_tensor = torch.stack([tensor for tensor in pred_node_feat_list], dim=1)
             pred_node_feats = pred_node_feat_tensor.numpy()
-            test_node_feats_aligned = test_node_feats[:, :pred_node_feats.shape[1]]
-            gnn_mse = np.mean((pred_node_feats - test_node_feats_aligned) ** 2, axis=1)
+            # Introduce aritificial data points to match the length of the test set.
+            padding = np.zeros((pred_node_feats.shape[0], sequence_length))
+            pred_node_feats_padded = np.concatenate([padding, pred_node_feats], axis=1)
+            gnn_mse = np.mean((pred_node_feats_padded - test_node_feats) ** 2, axis=1)
               
     print('----------')
     print()
