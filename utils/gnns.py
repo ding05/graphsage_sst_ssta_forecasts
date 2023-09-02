@@ -76,7 +76,7 @@ class MultiGraphSage_G(torch.nn.Module):
         x_final = self.final_linear(x_concat)
         return x_final.mean()
 
-# If adding an LSTM layer
+# If adding an LSTM layer to process node-level time series
 class MultiGraphSage_LSTM(torch.nn.Module):
     def __init__(self, in_channels, hid_channels, out_channels, num_graphs, aggr='mean'):
         super(MultiGraphSage_LSTM, self).__init__()
@@ -91,7 +91,8 @@ class MultiGraphSage_LSTM(torch.nn.Module):
                 x = layer(x, data.edge_index)
                 x = torch.tanh(x)
             x_list.append(x)
-        x_seq = torch.stack(x_list)
+        # Transpose to get sequences for each node.
+        x_seq = torch.stack(x_list).transpose(0, 1)  # x_seq's shape: (num_nodes, sequence_length, feature_size)
         lstm_out, _ = self.lstm(x_seq)
         return lstm_out
 
