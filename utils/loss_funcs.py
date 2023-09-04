@@ -2,6 +2,7 @@ import numpy as np
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+from torch.autograd import Variable
 
 def bmc_loss(pred, target, noise_var):
     """
@@ -13,8 +14,8 @@ def bmc_loss(pred, target, noise_var):
     Returns:
       loss: A float tensor. Balanced MSE Loss.
     """
-    #logits = - (pred - target.T).pow(2) / (2 * noise_var) # logit size: [batch, batch]
-    logits = - (pred - target.permute(*torch.arange(target.ndim - 1, -1, -1))).pow(2) / (2 * noise_var)
+    logits = - (pred - target.T).pow(2) / (2 * noise_var) # logit size: [batch, batch]
+    #logits = - (pred - target.permute(*torch.arange(target.ndim - 1, -1, -1))).pow(2) / (2 * noise_var)
     #print('noise_var:', float(noise_var.detach()))
     loss = F.cross_entropy(logits, torch.arange(pred.shape[0]).float()) # contrastive-like loss
     loss = loss * (2 * noise_var).detach() # optional: restore the loss scale, 'detach' when noise is learnable 
@@ -27,3 +28,14 @@ class BMCLoss(torch.nn.Module):
     def forward(self, pred, target):
         noise_var = self.noise_sigma ** 2
         return bmc_loss(pred, target, noise_var)
+
+def cm_weighted_mse(preds, targets, threshold, alpha=1.5, beta=0.5, weight=1.0):
+    # Ensure the threshold tensor has the same dimensions as targets.
+    threshold = threshold.view_as(targets)
+    # Calculate the weights using a tensor mask for conditional computation.
+    mask = targets > threshold
+    weights = ((weight * torch.abs(targets) ** alpha) * mask + (torch.abs(targets) ** alpha) * (~mask)) ** beta
+    unweighted_loss = (preds - targets) ** 2
+    loss = unweighted_loss * weights
+    loss = loss.mean()
+    return loss
