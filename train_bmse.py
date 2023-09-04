@@ -1,5 +1,5 @@
 from utils.gnns import *
-from utils.bmse import *
+from utils.loss_funcs import *
 
 import numpy as np
 from numpy import asarray, save, load
