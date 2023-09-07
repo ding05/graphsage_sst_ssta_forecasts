@@ -188,6 +188,7 @@ start = time.time()
 # Record the results by epoch.
 loss_epochs = []
 val_mse_nodes_epochs = []
+val_csi_nodes_epochs = []
 # Early stopping starting counter
 counter = 0
 
@@ -225,9 +226,10 @@ for epoch in range(num_epochs):
             optimizer.step()
     loss_epochs.append(loss.item())
 
-    # Compute the MSE on the validation set.
+    # Compute the MSE and critical success index (CSI) on the validation set.
     with torch.no_grad():
         val_mse_nodes = 0
+        val_csi_nodes = 0
         pred_node_feat_list = []
         
         if model_class != 'SAGE_LSTM':
@@ -248,6 +250,9 @@ for epoch in range(num_epochs):
             pred_node_feat_tensor = torch.stack([tensor for tensor in pred_node_feat_list], dim=1)
             pred_node_feats = pred_node_feat_tensor.numpy()
             gnn_mse = np.mean((pred_node_feats - test_node_feats) ** 2, axis=1)
+
+            val_csi_nodes = np.nanmean([calculate_csi(pred_node_feats[i], test_node_feats[i], node_feats_normalized_90[i]) for i in range(node_feats_normalized_90.shape[0])])
+            val_csi_nodes_epochs.append(val_csi_nodes.item())
         
         else:
             for i in range(0, len(val_graph_list) - sequence_length):
@@ -270,7 +275,10 @@ for epoch in range(num_epochs):
             padding = np.zeros((pred_node_feats.shape[0], sequence_length))
             pred_node_feats_padded = np.concatenate([padding, pred_node_feats], axis=1)
             gnn_mse = np.mean((pred_node_feats_padded - test_node_feats) ** 2, axis=1)
-              
+            
+            val_csi_nodes = np.nanmean([calculate_csi(pred_node_feats[i], test_node_feats[i], node_feats_normalized_90[i]) for i in range(node_feats_normalized_90.shape[0])])
+            val_csi_nodes_epochs.append(val_csi_nodes.item())
+
     print('----------')
     print()
 
@@ -278,10 +286,12 @@ for epoch in range(num_epochs):
     print('Epoch [{}/{}], Loss: {:.4f}, Validation MSE (calculated by column / graph): {:.4f}'.format(epoch + 1, num_epochs, loss.item(), val_mse_nodes))
     print('MSEs by node:', gnn_mse)
     print('Validation MSE (calculated by row / time series at nodes): {:.4f}'.format(np.mean(gnn_mse)))
+    print('Validation CSI (calculated by row / time series at nodes): {:.4f}'.format(val_csi_nodes))
     #print('Loss by epoch:', loss_epochs)
-    print('Loss by epoch:', [float('{:.6f}'.format(loss)) for loss in loss_epochs])
+    print('Loss by epoch:', [float('{:.6f}'.format(loss)) for loss in (loss_epochs[-20:] if len(loss_epochs) > 20 else loss_epochs)]) # Print the last 20 elements if the list is too long.
     #print('Validation MSE by epoch:', val_mse_nodes_epochs)
-    print('Validation MSE by epoch:', [float('{:.6f}'.format(val_mse)) for val_mse in val_mse_nodes_epochs])
+    print('Validation MSE by epoch:', [float('{:.6f}'.format(val_mse)) for val_mse in (val_mse_nodes_epochs[-20:] if len(val_mse_nodes_epochs) > 20 else val_mse_nodes_epochs)]) # Same as above.
+    print('Validation CSI by epoch:', [float('{:.6f}'.format(val_csi)) for val_csi in (val_csi_nodes_epochs[-20:] if len(val_csi_nodes_epochs) > 20 else val_csi_nodes_epochs)])
     print('Persistence MSE:', ((test_node_feats[:,1:] - test_node_feats[:,:-1])**2).mean())
 
     # Update the best model weights if the current validation MSE is lower than the previous minimum.
@@ -330,6 +340,7 @@ print()
 # Save the results.
 save(out_path + model_class + '_' + adj_filename[8:-4] + '_' + str(stop) +  '_losses' + '.npy', np.array(loss_epochs))
 save(out_path + model_class + '_' + adj_filename[8:-4] + '_' + str(stop) +  '_valmses' + '.npy', np.array(val_mse_nodes_epochs))
+save(out_path + model_class + '_' + adj_filename[8:-4] + '_' + str(stop) +  '_valcsis' + '.npy', np.array(val_csi_nodes_epochs))
 #save(out_path + model_class + '_' + adj_filename[8:-4] + '_' + str(stop) +  '_preds' + '.npy', pred_node_feats)
 save(out_path + model_class + '_' + adj_filename[8:-4] + '_' + str(stop) +  '_preds' + '.npy', best_pred_node_feats)
 save(out_path + model_class + '_' + adj_filename[8:-4] + '_' + str(stop) +  '_testobs' + '.npy', test_node_feats)
