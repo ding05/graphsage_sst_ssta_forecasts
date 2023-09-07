@@ -49,8 +49,6 @@ def sort_by_destination(edge_index):
 
 # Calculate the critical success index (CSI) node by node.
 def calculate_csi(pred_feats, test_feats, threshold):
-    #pred_feats = np.array(pred_feats)
-    #test_feats = np.array(test_feats)
     pred_pos = pred_feats > threshold
     true_pos = test_feats > threshold
     TP = np.logical_and(pred_pos, true_pos).sum()
