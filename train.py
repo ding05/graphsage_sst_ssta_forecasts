@@ -199,7 +199,8 @@ for epoch in range(num_epochs):
             optimizer.zero_grad()
             output = model([data])
             #loss = criterion(output.squeeze(), torch.tensor(data.y).squeeze())
-            loss = cm_weighted_mse(output.squeeze(), torch.tensor(data.y).squeeze(), threshold=threshold_tensor)
+            #loss = cm_weighted_mse(output.squeeze(), torch.tensor(data.y).squeeze(), threshold=threshold_tensor)
+            loss = cm_weighted_mse(output.squeeze(), torch.tensor(data.y).squeeze(), threshold=threshold_tensor, alpha=0.5, beta=1.0, weight=2.0)
             """
             # Elastic net
             l1_reg = 0.0
