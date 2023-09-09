@@ -24,7 +24,7 @@ node_feat_filename = 'node_feats_ssta_1980_2010.npy'
 #node_y_filename = 'node_feats_ssta.npy'
 #node_y_filename = 'blob.npy'
 #graph_y_filename = 'blob.npy'
-adj_filename = 'adj_mat_0.9.npy'
+adj_filename = 'adj_mat_0.8.npy'
 #adj_filename = 'adj_mat_0.9_100.npy'
 #adj_filename = 'adj_mat_0.9_directed.npy'
 
