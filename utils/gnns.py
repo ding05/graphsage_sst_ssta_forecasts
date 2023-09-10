@@ -100,7 +100,9 @@ class MultiGraphSage_LSTM(torch.nn.Module):
         lstm_input = torch.cat(x_seq_list, dim=0)
         lstm_out, _ = self.lstm(lstm_input)
         # Only return the last timestep's prediction for each sequence.
-        return lstm_out[:, -1, :].squeeze()
+        #return lstm_out[:, -1, :].squeeze()
+        # Only return the first timestep's prediction for each sequence.
+        return lstm_out[:, 0, :].squeeze()
 
 class MultiGraphGGCN(torch.nn.Module):
     def __init__(self, in_channels, hid_channels, out_channels, num_graphs):
