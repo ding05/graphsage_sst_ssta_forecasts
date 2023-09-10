@@ -24,14 +24,14 @@ node_feat_filename = 'node_feats_ssta_1980_2010.npy'
 #node_y_filename = 'node_feats_ssta.npy'
 #node_y_filename = 'blob.npy'
 #graph_y_filename = 'blob.npy'
-adj_filename = 'adj_mat_0.8.npy'
+adj_filename = 'adj_mat_0.9.npy'
 #adj_filename = 'adj_mat_0.9_100.npy'
 #adj_filename = 'adj_mat_0.9_directed.npy'
 
 window_size = 12
 lead_time = 1
-learning_rate = 0.001 # 0.001 for SSTs with MSE # 0.0005, 0.001 for RMSProp for SSTs
-#learning_rate = 0.01 # For the GraphSAGE-LSTM
+#learning_rate = 0.001 # 0.001 for SSTs with MSE # 0.0005, 0.001 for RMSProp for SSTs
+learning_rate = 0.01 # For the GraphSAGE-LSTM
 weight_decay = 0.0001 # 0.0001 for RMSProp
 momentum = 0.9
 l1_ratio = 1
@@ -158,8 +158,8 @@ threshold_tensor = torch.tensor(node_feats_normalized_90).float()
 # Define the model.
 #model, model_class = MultiGraphGCN(in_channels=graph_list[0].x[0].shape[0], hid_channels=30, out_channels=1, num_graphs=len(train_graph_list)), 'GCN'
 #model, model_class = MultiGraphGAT(in_channels=graph_list[0].x[0].shape[0], hid_channels=30, out_channels=1, num_heads=8, num_graphs=len(train_graph_list)), 'GAT'
-model, model_class = MultiGraphSage(in_channels=graph_list[0].x[0].shape[0], hid_channels=15, out_channels=1, num_graphs=len(train_graph_list), aggr='mean'), 'SAGE'
-#model, model_class = MultiGraphSage_LSTM(in_channels=graph_list[0].x[0].shape[0], hid_channels=15, out_channels=1, num_graphs=len(train_graph_list), aggr='mean'), 'SAGE_LSTM'
+#model, model_class = MultiGraphSage(in_channels=graph_list[0].x[0].shape[0], hid_channels=15, out_channels=1, num_graphs=len(train_graph_list), aggr='mean'), 'SAGE'
+model, model_class = MultiGraphSage_LSTM(in_channels=graph_list[0].x[0].shape[0], hid_channels=15, out_channels=1, num_graphs=len(train_graph_list), aggr='mean'), 'SAGE_LSTM'
 #model, model_class = MultiGraphSage(in_channels=graph_list[0].x[0].shape[0], hid_channels=15, out_channels=1, num_graphs=len(train_graph_list), aggr='mean'), 'SAGE_Blob'
 #model, model_class = MultiGraphGGCN(in_channels=graph_list[0].x[0].shape[0], hid_channels=30, out_channels=1, num_graphs=len(train_graph_list)), 'GGCN'
 # If directed graphs
@@ -198,9 +198,9 @@ for epoch in range(num_epochs):
         for data in train_graph_list:
             optimizer.zero_grad()
             output = model([data])
-            #loss = criterion(output.squeeze(), torch.tensor(data.y).squeeze())
+            loss = criterion(output.squeeze(), torch.tensor(data.y).squeeze())
             #loss = cm_weighted_mse(output.squeeze(), torch.tensor(data.y).squeeze(), threshold=threshold_tensor)
-            loss = cm_weighted_mse(output.squeeze(), torch.tensor(data.y).squeeze(), threshold=threshold_tensor, alpha=0.5, beta=1.0, weight=2.0)
+            #loss = cm_weighted_mse(output.squeeze(), torch.tensor(data.y).squeeze(), threshold=threshold_tensor, alpha=0.5, beta=1.0, weight=2.0)
             """
             # Elastic net
             l1_reg = 0.0
