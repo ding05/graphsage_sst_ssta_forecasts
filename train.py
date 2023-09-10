@@ -277,8 +277,7 @@ for epoch in range(num_epochs):
             pred_node_feats_padded = np.concatenate([padding, pred_node_feats], axis=1)
             gnn_mse = np.mean((pred_node_feats_padded - test_node_feats) ** 2, axis=1)
             
-            test_node_feats = test_node_feats[:, sequence_length:]
-            val_csi_nodes = np.nanmean([calculate_csi(pred_node_feats[i], test_node_feats[i], node_feats_normalized_90[i]) for i in range(node_feats_normalized_90.shape[0])])
+            val_csi_nodes = np.nanmean([calculate_csi(pred_node_feats_padded[i], test_node_feats[i], node_feats_normalized_90[i]) for i in range(node_feats_normalized_90.shape[0])])
             val_csi_nodes_epochs.append(val_csi_nodes.item())
 
     print('----------')
