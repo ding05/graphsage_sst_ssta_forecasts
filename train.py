@@ -25,7 +25,7 @@ node_feat_filename = 'node_feats_ssta_1980_2010.npy'
 #node_y_filename = 'node_feats_ssta.npy'
 #node_y_filename = 'blob.npy'
 #graph_y_filename = 'blob.npy'
-adj_filename = 'adj_mat_0.9.npy'
+adj_filename = 'adj_mat_0.8.npy'
 #adj_filename = 'adj_mat_0.9_100.npy'
 #adj_filename = 'adj_mat_0.9_directed.npy'
 
@@ -201,9 +201,9 @@ for epoch in range(num_epochs):
         for data in train_graph_list:
             optimizer.zero_grad()
             output = model([data])
-            loss = criterion(output.squeeze(), torch.tensor(data.y).squeeze())
+            #loss = criterion(output.squeeze(), torch.tensor(data.y).squeeze())
             #loss = cm_weighted_mse(output.squeeze(), torch.tensor(data.y).squeeze(), threshold=threshold_tensor)
-            #loss = cm_weighted_mse(output.squeeze(), torch.tensor(data.y).squeeze(), threshold=threshold_tensor, alpha=0.5, beta=1.0, weight=2.0)
+            loss = cm_weighted_mse(output.squeeze(), torch.tensor(data.y).squeeze(), threshold=threshold_tensor, alpha=0.5, beta=1.0, weight=2.0)
             """
             # Elastic net
             l1_reg = 0.0
@@ -303,9 +303,9 @@ for epoch in range(num_epochs):
     print()
 
     # Print the current epoch and validation MSE.
-    print('Epoch [{}/{}], Loss: {:.4f}, Validation MSE (calculated by column / graph): {:.4f}'.format(epoch + 1, num_epochs, loss.item(), val_mse_nodes))
+    print('Epoch [{}/{}], Loss: {:.6f}, Validation MSE (calculated by column / graph): {:.6f}'.format(epoch + 1, num_epochs, loss.item(), val_mse_nodes))
     print('MSEs by node:', gnn_mse)
-    print('Validation MSE, precision, recall, and CSI (calculated by row / time series at nodes): {:.4f}, {:.4f}, {:.4f}, {:.4f}'.format(np.mean(gnn_mse), val_precision_nodes, val_recall_nodes, val_csi_nodes))
+    print('Validation MSE, precision, recall, and CSI (calculated by row / time series at nodes): {:.6f}, {:.6f}, {:.6f}, {:.6f}'.format(np.mean(gnn_mse), val_precision_nodes, val_recall_nodes, val_csi_nodes))
     #print('Validation precision (calculated by row / time series at nodes): {:.4f}'.format(val_precision_nodes))
     #print('Validation recall (calculated by row / time series at nodes): {:.4f}'.format(val_recall_nodes))
     #print('Validation CSI (calculated by row / time series at nodes): {:.4f}'.format(val_csi_nodes))
