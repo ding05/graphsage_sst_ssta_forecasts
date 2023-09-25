@@ -308,7 +308,7 @@ for epoch in range(num_epochs):
     print('Validation MSE, precision, recall, and CSI (calculated by row / time series at nodes): {:.4f}, {:.4f}, {:.4f}, {:.4f}'.format(np.mean(gnn_mse), val_precision_nodes, val_recall_nodes, val_csi_nodes))
     #print('Validation precision (calculated by row / time series at nodes): {:.4f}'.format(val_precision_nodes))
     #print('Validation recall (calculated by row / time series at nodes): {:.4f}'.format(val_recall_nodes))
-    print('Validation CSI (calculated by row / time series at nodes): {:.4f}'.format(val_csi_nodes))
+    #print('Validation CSI (calculated by row / time series at nodes): {:.4f}'.format(val_csi_nodes))
     #print('Loss by epoch:', loss_epochs)
     print('Loss by epoch:', [float('{:.6f}'.format(loss)) for loss in (loss_epochs[-20:] if len(loss_epochs) > 20 else loss_epochs)]) # Print the last 20 elements if the list is too long.
     #print('Validation MSE by epoch:', val_mse_nodes_epochs)
