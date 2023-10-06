@@ -167,7 +167,7 @@ model, model_class = MultiGraphSage(in_channels=graph_list[0].x[0].shape[0], hid
 #model, model_class = MultiGraphRGCN(in_channels=graph_list[0].x[0].shape[0], hid_channels=50, out_channels=1, num_relations=2, num_bases=4), 'RGCN'
 
 # Define the loss function.
-criterion = BMCLoss(2)
+criterion = BMCLoss(5.0)
 criterion_test = nn.MSELoss()
 
 # Define the optimizer.
@@ -311,7 +311,7 @@ for epoch in range(num_epochs):
     #print('Loss by epoch:', loss_epochs)
     print('Loss by epoch:', [float('{:.6f}'.format(loss)) for loss in (loss_epochs[-20:] if len(loss_epochs) > 20 else loss_epochs)]) # Print the last 20 elements if the list is too long.
     #print('Noise variable by epoch:', [float('{:.4f}'.format(noise_var)) for noise_var in noise_var_epochs[-20:]])
-    print('Noise variable:', [float('{:.4f}'.format(noise_var_epochs[-1]))])
+    print('Noise variable:', float('{:.4f}'.format(noise_var_epochs[-1])))
     print('Validation MSE by epoch:', [float('{:.6f}'.format(val_mse)) for val_mse in (val_mse_nodes_epochs[-20:] if len(val_mse_nodes_epochs) > 20 else val_mse_nodes_epochs)]) # Same as above.
     print('Validation precision by epoch:', [float('{:.6f}'.format(val_precision)) for val_precision in (val_precision_nodes_epochs[-20:] if len(val_precision_nodes_epochs) > 20 else val_precision_nodes_epochs)])
     print('Validation recall by epoch:', [float('{:.6f}'.format(val_recall)) for val_recall in (val_recall_nodes_epochs[-20:] if len(val_recall_nodes_epochs) > 20 else val_recall_nodes_epochs)])
