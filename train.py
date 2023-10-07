@@ -201,9 +201,9 @@ for epoch in range(num_epochs):
         for data in train_graph_list:
             optimizer.zero_grad()
             output = model([data])
-            loss = criterion(output.squeeze(), torch.tensor(data.y).squeeze())
+            #loss = criterion(output.squeeze(), torch.tensor(data.y).squeeze())
             #loss = cm_weighted_mse(output.squeeze(), torch.tensor(data.y).squeeze(), threshold=threshold_tensor)
-            #loss = cm_weighted_mse(output.squeeze(), torch.tensor(data.y).squeeze(), threshold=threshold_tensor, alpha=0.5, beta=1.0, weight=2.0)
+            loss = cm_weighted_mse(output.squeeze(), torch.tensor(data.y).squeeze(), threshold=threshold_tensor, alpha=0.5, beta=1.0, weight=1.5)
             """
             # Elastic net
             l1_reg = 0.0
@@ -226,6 +226,8 @@ for epoch in range(num_epochs):
             optimizer.zero_grad()
             output = model([data_sequence])
             loss = criterion(output, torch.tensor(target_data.y).squeeze())
+            #loss = cm_weighted_mse(output.squeeze(), torch.tensor(data.y).squeeze(), threshold=threshold_tensor)
+            #loss = cm_weighted_mse(output.squeeze(), torch.tensor(data.y).squeeze(), threshold=threshold_tensor, alpha=0.5, beta=1.0, weight=2.0)
             loss.backward()
             optimizer.step()
     loss_epochs.append(loss.item())
