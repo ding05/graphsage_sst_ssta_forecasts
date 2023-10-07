@@ -46,8 +46,9 @@ print()
 # Compute the total number of time steps.
 num_time = node_feat_grid.shape[1] - window_size - 1 + 1
 
-for lead_time in [2, 3, 6, 12, 18, 24]:
+#for lead_time in [2, 3, 6, 12, 18, 24]:
 #for lead_time in [24]:
+for lead_time in list(range(1, 25)):
     
     # Generate PyG graphs from NumPy arrays.
     graph_list = []
@@ -115,7 +116,7 @@ for lead_time in [2, 3, 6, 12, 18, 24]:
     for time in range(node_feat_grid.shape[1] - (840 + window_size + lead_time - 1)):
     
         # Extract strating test input features.
-        start_test_input_graph_list = [graph_list[time]]
+        start_test_input_graph_list = [graph_list[840 + time]]
         
         # Initialization.
         test_input_graph_list = start_test_input_graph_list
@@ -165,8 +166,9 @@ for lead_time in [2, 3, 6, 12, 18, 24]:
     prediction_array = prediction_array.squeeze()
     print("Predictions' shape:", prediction_array.shape)
     print("Observations' shape:", test_node_feats.shape)
+    print('Average MSE:', ((prediction_array - test_node_feats) ** 2).mean())
     print('--------------------')
     print()
     
-    save(out_path + saved_model + '_' + adj_filename[8:-4] + '_' + str(lead_time) + '_preds.npy', prediction_array)
-    save(out_path + saved_model + '_' + adj_filename[8:-4] + '_' + str(lead_time) + '_testobs.npy', test_node_feats)
+    save(out_path + saved_model + '_' + str(lead_time) + '_preds.npy', prediction_array)
+    save(out_path + saved_model + '_' + str(lead_time) + '_testobs.npy', test_node_feats)
