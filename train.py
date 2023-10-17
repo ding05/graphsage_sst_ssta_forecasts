@@ -25,7 +25,7 @@ node_feat_filename = 'node_feats_ssta_1980_2010.npy'
 #node_y_filename = 'node_feats_ssta.npy'
 #node_y_filename = 'blob.npy'
 #graph_y_filename = 'blob.npy'
-adj_filename = 'adj_mat_0.9.npy'
+adj_filename = 'adj_mat_0.7.npy'
 #adj_filename = 'adj_mat_0.9_100.npy'
 #adj_filename = 'adj_mat_0.9_directed.npy'
 
@@ -203,7 +203,7 @@ for epoch in range(num_epochs):
             output = model([data])
             #loss = criterion(output.squeeze(), torch.tensor(data.y).squeeze())
             #loss = cm_weighted_mse(output.squeeze(), torch.tensor(data.y).squeeze(), threshold=threshold_tensor)
-            loss = cm_weighted_mse(output.squeeze(), torch.tensor(data.y).squeeze(), threshold=threshold_tensor, alpha=0.5, beta=1.0, weight=1.5)
+            loss = cm_weighted_mse(output.squeeze(), torch.tensor(data.y).squeeze(), threshold=threshold_tensor, alpha=2.0, beta=1.0, weight=2.0)
             """
             # Elastic net
             l1_reg = 0.0

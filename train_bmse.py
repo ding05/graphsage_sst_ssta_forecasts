@@ -25,7 +25,7 @@ node_feat_filename = 'node_feats_ssta_1980_2010.npy'
 #node_y_filename = 'node_feats_ssta.npy'
 #node_y_filename = 'blob.npy'
 #graph_y_filename = 'blob.npy'
-adj_filename = 'adj_mat_0.9.npy'
+adj_filename = 'adj_mat_0.7.npy'
 #adj_filename = 'adj_mat_0.9_100.npy'
 #adj_filename = 'adj_mat_0.9_directed.npy'
 
@@ -33,6 +33,7 @@ window_size = 12
 lead_time = 1
 learning_rate = 0.001 # 0.001 for SSTs with MSE # 0.0005, 0.001 for RMSProp for SSTs
 #learning_rate = 0.01 # For the GraphSAGE-LSTM
+#learning_rate = 0.01 # For the BMSE loss with the noise variable greater than 1.0
 weight_decay = 0.0001 # 0.0001 for RMSProp
 momentum = 0.9
 l1_ratio = 1
@@ -167,7 +168,7 @@ model, model_class = MultiGraphSage(in_channels=graph_list[0].x[0].shape[0], hid
 #model, model_class = MultiGraphRGCN(in_channels=graph_list[0].x[0].shape[0], hid_channels=50, out_channels=1, num_relations=2, num_bases=4), 'RGCN'
 
 # Define the loss function.
-criterion = BMCLoss(5.0)
+criterion = BMCLoss(0.002)
 criterion_test = nn.MSELoss()
 
 # Define the optimizer.
