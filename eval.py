@@ -73,7 +73,7 @@ for time_i in range(num_time):
     # If an empty adjacency matrix
     #data = Data(x=x, y=y, num_nodes=node_feat_grid.shape[0], num_edges=adj_mat.shape[1], has_isolated_nodes=True, has_self_loops=False, is_undirected=True)
     # If directed graphs
-    edge_attr = torch.ones(edge_index.shape[1], dtype=torch.float)
+    #edge_attr = torch.ones(edge_index.shape[1], dtype=torch.float)
     #data = Data(x=x, y=y, edge_index=edge_index, edge_attr=edge_attr, num_nodes=node_feat_grid.shape[0], num_edges=adj_mat.shape[1], has_isolated_nodes=True, has_self_loops=False, is_undirected=False)
     graph_list.append(data)
 
