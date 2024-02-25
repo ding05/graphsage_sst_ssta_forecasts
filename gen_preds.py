@@ -109,7 +109,7 @@ for lead_time in list(range(1, 25)):
     print('----------')
     print()
     
-    # Initialization.
+    # Initialization
     predictions = []
     
     # Use a loop to iterate over every starting time.
